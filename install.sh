@@ -65,6 +65,7 @@ install_tmux() {
     cp "$DOTFILES/.tmux.conf" "$HOME/.tmux.conf"
     cp -r "$DOTFILES/.tmux" "$HOME/.tmux"
     echo "  [done] tmux installed"
+    echo "  [tip]  run: tmux source-file ~/.tmux.conf"
 }
 
 install_all() {
@@ -74,7 +75,10 @@ install_all() {
     install_vim
     install_tmux
     echo ""
-    echo "Done. Run: source ~/.bashrc"
+    echo "Done."
+echo ""
+echo "  bash: source ~/.bashrc"
+echo "  tmux: tmux source-file ~/.tmux.conf"
 }
 
 # === deploy (backup + install) ===
@@ -108,7 +112,10 @@ deploy_all() {
     deploy_vim
     deploy_tmux
     echo ""
-    echo "All done. Run: source ~/.bashrc"
+    echo "All done."
+echo ""
+echo "  bash: source ~/.bashrc"
+echo "  tmux: tmux source-file ~/.tmux.conf"
 }
 
 # === main ===
