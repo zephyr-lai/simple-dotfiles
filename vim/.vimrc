@@ -13,7 +13,17 @@ set number                         " 行号
 set ruler                          " 右下角显示光标位置
 set showmatch                      " 高亮匹配的括号
 set cursorline                     " 高亮当前行
-set cursorcolumn                   " 高亮当前列
+set cursorlineopt=number           " 只高亮行号列，不污染整行背景
+" set cursorcolumn                 " 垂直标尺（大多数人用不上）
+set background=dark                " 暗色背景
+colorscheme retrobox               " 内置配色, (sorbet/retrobox 相对较好）
+" 内置配色候选(共27个): blue, darkblue, default, delek, desert, elflord, evening, habamax, industry, koehler, lists, lunaperche, morning, murphy, pablo, peachpuff, quiet, retrobox, ron, shine, slate, sorbet, tools, torte, wildcharm, zaibatsu, zellner
+
+" === 光标形状 ===
+" NORMAL/REPLACE: 块  |  INSERT: 竖线  |  VISUAL: 块
+let &t_SI = "\e[6 q"                 " 进入 Insert 模式 → |
+let &t_SR = "\e[4 q"                 " 进入 Replace 模式 → _
+let &t_EI = "\e[2 q"                 " 回到 Normal 模式 → 块
 
 " === 搜索 ===
 set hlsearch                       " 高亮所有匹配结果
