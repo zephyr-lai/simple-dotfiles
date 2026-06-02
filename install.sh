@@ -177,7 +177,7 @@ deploy_all() {
 # === main ===
 cmd="${1:-deploy}"
 tool="${2:-all}"
-METHOD="${3:-cp}"
+METHOD="${3:-stow}"
 
 case "$cmd" in
     backup)
@@ -224,8 +224,8 @@ case "$cmd" in
         echo "  deploy    备份 + 安装（默认）"
         echo "  uninstall 卸载配置"
         echo ""
-        echo "  cp        拷贝方式（默认，离线安全）"
-        echo "  stow      软链接方式（改一处，仓库同步）"
+        echo "  cp        拷贝方式（离线安全）"
+        echo "  stow      软链接方式（默认，改一处仓库同步）"
         exit 1
         ;;
 esac

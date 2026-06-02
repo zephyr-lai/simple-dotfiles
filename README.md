@@ -25,13 +25,13 @@ dotfiles/
 git clone git@github.com:zephyr-lai/simple-dotfiles.git ~/simple-dotfiles
 cd ~/simple-dotfiles
 
-# cp 方式（默认，离线安全）
-./install.sh                     # 备份 + 安装全部
-./install.sh deploy vim cp       # 只部署 vim
-
-# stow 方式（软链接，改一处仓库同步）
-./install.sh deploy all stow     # 备份 + stow 全部
+# stow 方式（默认，软链接，改一处仓库同步）
+./install.sh                     # 备份 + stow 全部
 ./install.sh install vim stow    # 只安装 vim（不备份）
+
+# cp 方式（离线安全）
+./install.sh deploy all cp       # 备份 + cp 全部
+./install.sh deploy vim cp       # 只部署 vim
 
 source ~/.bashrc
 ```
@@ -51,8 +51,8 @@ source ~/.bashrc
 
 | 方法 | 作用 |
 |------|------|
-| `cp` | 拷贝方式（默认，离线安全，不需要额外依赖） |
-| `stow` | 软链接方式（需要 `apt install stow`，改一处仓库同步） |
+| `stow` | 软链接方式（默认，需要 `apt install stow`，改一处仓库同步） |
+| `cp` | 拷贝方式（离线安全，不需要额外依赖） |
 
 | 示例 | 效果 |
 |------|------|
