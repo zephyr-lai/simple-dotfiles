@@ -15,13 +15,6 @@ HISTFILESIZE=2000
 # === terminal ===
 shopt -s checkwinsize               # update LINES/COLUMNS on resize
 
-# readline 补全行为
-bind 'set show-all-if-ambiguous on'     # Tab 一次直接列出所有候选(不响铃)
-bind 'set completion-ignore-case off'   # 区分大小写
-bind 'set visible-stats on'              # 路径后追加类型指示符 (/ @ * = % |)
-bind 'set blink-matching-paren on'       # 输入 )/] 时光标闪到匹配处
-bind 'set colored-completion-prefix on'  # 补全列表中共同前缀加粗高亮 (bash 4.3+)
-
 # color detection
 case "$TERM" in
     xterm-color|*-256color) color_prompt=yes;;
