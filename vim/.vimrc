@@ -37,6 +37,28 @@ set tabstop=4                      " tab 显示为 4 个空格
 set shiftwidth=4                   " 缩进宽度 4 个空格
 set autoindent                     " 自动缩进
 
+" === 补全 ===
+" Insert 模式: Ctrl-F 触发文件名补全 (手动备用)
+inoremap <C-f> <C-x><C-f>
+
+" Insert 模式: 检测到 / (输入或删除到达) 自动弹文件补全
+" 补全到目录后自动链式弹下一层 (因末尾仍是 /,TextChangedI 再次触发)
+" 不区分注释/正则等,纯按 / 判定
+" completeopt=noselect,noinsert,menuone: 弹窗不预选,需手动 Down+Enter 确认
+augroup AutoPathComplete
+    autocmd!
+    autocmd TextChangedI * call s:auto_path_on_slash()
+augroup END
+set completeopt+=noselect,noinsert,menuone
+
+function! s:auto_path_on_slash() abort
+    if &buftype !=# '' | return | endif                " 跳过特殊 buffer
+    let l:col = col('.')
+    if l:col < 2 | return | endif
+    if getline('.')[l:col-2] !=# '/' | return | endif " 光标前是 / 才触发
+    call feedkeys("\<C-x>\<C-f>", 'nt')
+endfunction
+
 " === 操作体验 ===
 set mouse=a                        " 鼠标支持：点击定位、滚轮翻页
 set clipboard=unnamedplus          " 与系统剪贴板互通
