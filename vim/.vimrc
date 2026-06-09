@@ -16,7 +16,7 @@ set cursorline                     " 高亮当前行
 set cursorlineopt=number           " 只高亮行号列，不污染整行背景
 " set cursorcolumn                 " 垂直标尺（大多数人用不上）
 set background=dark                " 暗色背景
-colorscheme retrobox               " 内置配色, (sorbet/retrobox 相对较好）
+colorscheme retrobox               " 内置配色, (sorbet/retrobox/pablo 相对较好）
 " 内置配色候选(共27个): blue, darkblue, default, delek, desert, elflord, evening, habamax, industry, koehler, lists, lunaperche, morning, murphy, pablo, peachpuff, quiet, retrobox, ron, shine, slate, sorbet, tools, torte, wildcharm, zaibatsu, zellner
 
 " === 光标形状 ===
