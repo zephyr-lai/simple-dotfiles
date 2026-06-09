@@ -30,8 +30,7 @@ parse_git_branch() {
     # Bash 非打印字符标记（等价于 \[ \]，在 $(...) 子 shell 中也安全）
     local NP=$'\001' CP=$'\002' ESC=$'\033'
     local RST="${NP}${ESC}[00m${CP}"   # reset
-    local WHT="${NP}${ESC}[01;37m${CP}" # 括号
-    local YEL="${NP}${ESC}[01;33m${CP}" # 分支名
+    local YEL="${NP}${ESC}[01;33m${CP}" # 括号 + 分支名
     local RED="${NP}${ESC}[01;31m${CP}" # 所有状态标记
 
     local markers=""
@@ -52,7 +51,7 @@ parse_git_branch() {
         && markers+="${RED}↓${behind}${RST}"                           # 落后
 
     [ -n "$markers" ] && markers=" ${markers}"
-    echo "${WHT}(${YEL}${branch}${RST}${markers}${WHT})${RST}"
+    echo "${YEL}(${branch}${RST}${markers}${YEL})${RST}"
 }
 
 # === PS1 ===
