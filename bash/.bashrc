@@ -21,24 +21,43 @@ case "$TERM" in
 esac
 
 # === git status for prompt ===
+# 每种状态用不同 ANSI 颜色，分支名干净/有改动时也会变色
 parse_git_branch() {
-    local branch=$(git branch 2>/dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
+    local branch=$(git symbolic-ref --short HEAD 2>/dev/null \
+                || git rev-parse --short HEAD 2>/dev/null)
     [ -z "$branch" ] && return
 
-    local status=""
-    git diff --quiet 2>/dev/null || status="${status}*"       # unstaged
-    git diff --cached --quiet 2>/dev/null || status="${status}+"  # staged
-    [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ] && status="${status}?"  # untracked
-    local ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null)
-    [ -n "$ahead" ] && [ "$ahead" -gt 0 ] && status="${status}↑"  # unpushed
+    # Bash 非打印字符标记（等价于 \[ \]，在 $(...) 子 shell 中也安全）
+    local NP=$'\001' CP=$'\002' ESC=$'\033'
+    local RST="${NP}${ESC}[00m${CP}"   # reset
+    local WHT="${NP}${ESC}[01;37m${CP}" # 括号
+    local YEL="${NP}${ESC}[01;33m${CP}" # 分支名
+    local RED="${NP}${ESC}[01;31m${CP}" # 所有状态标记
 
-    [ -n "$status" ] && status=" ${status}"
-    echo "($branch$status)"
+    local markers=""
+
+    git diff --quiet 2>/dev/null \
+        || markers+="${RED}*${RST}"                                    # 未暂存
+    git diff --cached --quiet 2>/dev/null \
+        || markers+="${RED}+${RST}"                                    # 已暂存
+    [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ] \
+        && markers+="${RED}?${RST}"                                   # 未跟踪
+
+    local ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null)
+    [ -n "$ahead" ] && [ "$ahead" -gt 0 ] \
+        && markers+="${RED}↑${ahead}${RST}"                            # 未推送
+
+    local behind=$(git rev-list --count HEAD..@{u} 2>/dev/null)
+    [ -n "$behind" ] && [ "$behind" -gt 0 ] \
+        && markers+="${RED}↓${behind}${RST}"                           # 落后
+
+    [ -n "$markers" ] && markers=" ${markers}"
+    echo "${WHT}(${YEL}${branch}${RST}${markers}${WHT})${RST}"
 }
 
 # === PS1 ===
 if [ "$color_prompt" = yes ]; then
-    PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \[\033[01;33m\]$(parse_git_branch)\[\033[00m\]\$ '
+    PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] $(parse_git_branch)\$ '
 else
     PS1='\u@\h:\w$(parse_git_branch)\$ '
 fi
