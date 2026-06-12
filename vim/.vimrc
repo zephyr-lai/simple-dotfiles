@@ -4,6 +4,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'tpope/vim-commentary'          " gc 一键注释
 Plug 'airblade/vim-gitgutter'        " 行号左侧显示 git 改动标记
 Plug 'itchyny/lightline.vim'         " 轻量状态栏
+Plug 'jclsn/glow.vim'                " :Glow / :Glowsplit / :Glowpop 调外部 glow 渲染 md
 
 call plug#end()
 
