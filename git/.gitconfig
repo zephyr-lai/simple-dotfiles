@@ -1,0 +1,11 @@
+# git difftool: open diffs in vimdiff, skip per-file y/N prompt
+[diff]
+    tool = vimdiff
+
+[difftool]
+    prompt = false        # 关闭 "View 'foo.py' [Y/n]" 逐文件确认
+    keepBackup = false
+
+[alias]
+    df  = difftool
+    dfs = difftool --staged

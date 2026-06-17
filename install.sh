@@ -1,4 +1,5 @@
 #!/bin/bash
+#
 set -e
 
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
@@ -34,12 +35,18 @@ backup_tmux() {
     backup_file .tmux
 }
 
+backup_git() {
+    echo "==> backup git"
+    backup_file .gitconfig
+}
+
 backup_all() {
     echo "backup to: $BACKUP_DIR"
     echo ""
     backup_bash
     backup_vim
     backup_tmux
+    backup_git
     echo ""
     echo "Backup done."
 }
@@ -71,6 +78,12 @@ install_tmux() {
     fi
 }
 
+install_git() {
+    echo "==> install git"
+    cp "$DOTFILES/git/.gitconfig" "$HOME/.gitconfig"
+    echo "  [copy] git installed"
+}
+
 stow_link() {
     local pkg="${1:-.}"
     command -v stow >/dev/null 2>&1 || { echo "  [error] stow not found, install: apt install stow"; exit 1; }
@@ -89,11 +102,12 @@ install_all() {
     echo "dotfiles from: $DOTFILES"
     echo ""
     case "$METHOD" in
-        stow) stow_link bash && stow_link vim && stow_link tmux ;;
+        stow) stow_link bash && stow_link vim && stow_link tmux && stow_link git ;;
         *)
             install_bash
             install_vim
             install_tmux
+            install_git
             ;;
     esac
     echo ""
@@ -129,12 +143,17 @@ uninstall_tmux() {
     remove_file .tmux
 }
 
+uninstall_git() {
+    echo "==> uninstall git"
+    remove_file .gitconfig
+}
+
 uninstall_all() {
     echo "dotfiles from: $DOTFILES"
     echo ""
     case "$METHOD" in
-        stow) stow_unlink bash && stow_unlink vim && stow_unlink tmux ;;
-        *)    uninstall_bash && uninstall_vim && uninstall_tmux ;;
+        stow) stow_unlink bash && stow_unlink vim && stow_unlink tmux && stow_unlink git ;;
+        *)    uninstall_bash && uninstall_vim && uninstall_tmux && uninstall_git ;;
     esac
     echo ""
     echo "Uninstall done."
@@ -163,6 +182,12 @@ deploy_tmux() {
     [ "$METHOD" = "stow" ] && stow_link tmux || install_tmux
 }
 
+deploy_git() {
+    echo "==> deploy git"
+    backup_file .gitconfig
+    [ "$METHOD" = "stow" ] && stow_link git || install_git
+}
+
 deploy_all() {
     echo "dotfiles from: $DOTFILES"
     echo "backup to:    $BACKUP_DIR"
@@ -170,6 +195,7 @@ deploy_all() {
     deploy_bash
     deploy_vim
     deploy_tmux
+    deploy_git
     echo ""
     echo "All done. Run: source ~/.bashrc"
 }
@@ -185,8 +211,9 @@ case "$cmd" in
             bash) backup_bash ;;
             vim)  backup_vim ;;
             tmux) backup_tmux ;;
+            git)  backup_git ;;
             all)  backup_all ;;
-            *)    echo "Usage: $0 backup {bash|vim|tmux|all}" && exit 1 ;;
+            *)    echo "Usage: $0 backup {bash|vim|tmux|git|all}" && exit 1 ;;
         esac
         ;;
     install)
@@ -194,8 +221,9 @@ case "$cmd" in
             bash) [ "$METHOD" = "stow" ] && stow_link bash || install_bash ;;
             vim)  [ "$METHOD" = "stow" ] && stow_link vim  || install_vim ;;
             tmux) [ "$METHOD" = "stow" ] && stow_link tmux || install_tmux ;;
+            git)  [ "$METHOD" = "stow" ] && stow_link git  || install_git ;;
             all)  install_all ;;
-            *)    echo "Usage: $0 install {bash|vim|tmux|all} [{cp|stow}]" && exit 1 ;;
+            *)    echo "Usage: $0 install {bash|vim|tmux|git|all} [{cp|stow}]" && exit 1 ;;
         esac
         ;;
     deploy)
@@ -203,8 +231,9 @@ case "$cmd" in
             bash) deploy_bash ;;
             vim)  deploy_vim ;;
             tmux) deploy_tmux ;;
+            git)  deploy_git ;;
             all)  deploy_all ;;
-            *)    echo "Usage: $0 deploy {bash|vim|tmux|all} [{cp|stow}]" && exit 1 ;;
+            *)    echo "Usage: $0 deploy {bash|vim|tmux|git|all} [{cp|stow}]" && exit 1 ;;
         esac
         ;;
     uninstall)
@@ -212,8 +241,9 @@ case "$cmd" in
             bash) [ "$METHOD" = "stow" ] && stow_unlink bash || uninstall_bash ;;
             vim)  [ "$METHOD" = "stow" ] && stow_unlink vim  || uninstall_vim ;;
             tmux) [ "$METHOD" = "stow" ] && stow_unlink tmux || uninstall_tmux ;;
+            git)  [ "$METHOD" = "stow" ] && stow_unlink git  || uninstall_git ;;
             all)  uninstall_all ;;
-            *)    echo "Usage: $0 uninstall {bash|vim|tmux|all} [{cp|stow}]" && exit 1 ;;
+            *)    echo "Usage: $0 uninstall {bash|vim|tmux|git|all} [{cp|stow}]" && exit 1 ;;
         esac
         ;;
     *)
