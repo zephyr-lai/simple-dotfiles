@@ -80,3 +80,12 @@ let g:lightline = {
   \   'right': [['lineinfo'], ['percent']]
   \ }
   \ }
+
+" === netrw（内置文件浏览器）===
+let g:netrw_banner = 0          " 隐藏顶部横幅
+let g:netrw_liststyle = 3       " 树状显示
+let g:netrw_browse_split = 4    " 在先前窗口打开文件
+let g:netrw_altv = 1            " 垂直分割时文件放右边
+let g:netrw_winsize = 25        " 侧边栏宽度 25%
+nnoremap <C-n> :Lexplore<CR>    " Ctrl-n 切换目录侧边栏
+
