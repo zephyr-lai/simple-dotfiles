@@ -9,6 +9,7 @@
 - 安装方式：`cp`（拷贝）或 `stow`（符号链接，默认）
 - stow 解析链（`require_stow`）：系统已有 → brew/apt 在线安装 → 仓库内置版安装到 `~/.local/bin`（全局可用）
 - 内置 stow 在 `tools/stow/`（vendored GNU stow 2.4.1，改过 shebang 和 lib 路径，勿用上游原样覆盖）
+- `claude/` 包维护 skills / commands / agents / 去敏 settings；插件用 `tools/claude-restore.sh` 恢复（新装插件后需同步更新该脚本的清单）
 
 ## 敏感信息规则（最重要）
 

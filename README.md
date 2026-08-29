@@ -10,8 +10,9 @@ simple-dotfiles/
 ├── vim/                ← stow 包：.vimrc + .vim/
 ├── tmux/               ← stow 包：.tmux.conf + .tmux/
 ├── git/                ← stow 包：.gitconfig
-├── claude/             ← stow 包：settings.json（去敏）+ skills/
+├── claude/             ← stow 包：settings.json（去敏）+ skills/ + commands/ + agents/
 ├── tools/stow/         ← vendored GNU stow（断网兜底，见「stow 自动安装」）
+├── tools/claude-restore.sh ← 新机器恢复 Claude Code 插件环境
 ├── install.sh          ← 唯一入口
 ├── CLAUDE.md           ← 项目规则（AI 辅助开发时自动加载）
 └── README.md
@@ -146,8 +147,19 @@ stow 方式会自动解析工具，顺序为：
 | `settings.json` | 去敏配置（模型映射、代理、权限白名单），stow 链接到 `~/.claude/` |
 | `settings.local.json.example` | 本地配置模板，复制为 `~/.claude/settings.local.json` 后填入自己的 token |
 | `skills/` | pms、ima-skill 技能（无硬编码凭证） |
+| `commands/` `agents/` | 自定义斜杠命令和 subagent（目前为空，写了就往这里放） |
 
 **敏感信息规则**：`~/.claude/settings.local.json` 存放 token 等秘密，永不入仓（`.gitignore` 已兜底）。仓库是 PUBLIC，提交任何改动前请自查是否包含密钥。
+
+### 新机器恢复插件环境
+
+skills / commands / agents 随 `install.sh` 部署，插件（11 个）需联网安装：
+
+```bash
+./tools/claude-restore.sh
+```
+
+脚本幂等：先注册自定义 marketplace（planning-with-files、ui-ux-pro-max、anthropic-agent-skills、karpathy-skills），再安装各插件（superpowers、code-review、code-simplifier、ralph-loop、frontend-design、skill-creator 等），已安装的自动跳过。新机器完整恢复流程：`install.sh deploy all` → 复制 settings.local.json 模板填 token → 跑本脚本。
 
 ## 插件更新
 
