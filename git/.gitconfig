@@ -9,3 +9,6 @@
 [alias]
     df  = difftool
     dfs = difftool --staged
+[user]
+	name = zephyrus
+	email = zhipinglai@qq.com
