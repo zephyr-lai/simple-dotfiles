@@ -176,7 +176,7 @@ wsl rsync -avzh --progress --exclude-from=.rsyncignore `
 当 PMS 根目录（`personal-management-system/`）不存在时：
 
 1. **从远程服务器导入** — 用 rsync 从服务器拉取（见 5.1），需用户提供服务器地址、用户名、目标路径
-2. **将现有文件夹整理成 PMS 形式** — 用户指定一个文件夹，并勾选其中需要整理哪些子项（其余保持原样）；也支持指定其他文件夹。确认后创建 PMS 根目录、恢复 README，再按分类决策流程整理所选内容
+2. **将现有文件夹整理成 PMS 形式** — 用户指定一个文件夹，并勾选其中需要整理哪些子项（其余保持原样）；也支持指定其他文件夹。确认后创建 PMS 根目录，按分类决策流程整理所选内容，完成后根据实际结构生成 README（skill 是初始模板，README 是系统结构的实时说明）
 
 ### 启动健康检查
 
@@ -185,7 +185,7 @@ wsl rsync -avzh --progress --exclude-from=.rsyncignore `
 1. 十槽目录（`00-identity` ~ `09-projects`、`99-storage`）齐全 — 缺失的槽自动创建并提示
 2. 一级目录为英文 kebab-case — 发现中文槽名（如 `03-笔记空间/`）提示用户并协助迁移
 3. 根目录除 `README.md`、`.rsyncignore` 与十槽外无杂物 — 发现后按分类决策建议归属，用户确认后整理
-4. `README.md` 与 skill 的 reference 一致 — 以修改时间较新的一方为准覆盖
+4. `README.md` 存在且反映实际结构 — 缺失或不符时根据实际结构重新生成。skill 的 reference 是初始模板，仅在从零初始化时使用，不随 README 变化自动更新
 5. `.rsyncignore` 存在 — 缺失时从 skill 的 references 恢复
 
 ### 新增内容
@@ -203,7 +203,7 @@ wsl rsync -avzh --progress --exclude-from=.rsyncignore `
 
 - 每季度清理过期中间文件（如实验截图、临时导出数据）
 - 每年归档一次不再活跃的项目（移入年份归档目录）
-- 新增分类时更新本文档
+- 目录结构变化时更新 README（实时说明）；如需将变化固化进 skill 模板，需用户明确确认
 - `00-identity/` 保持只增不减（身份文件永久保留）
 
 ---
