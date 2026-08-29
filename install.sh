@@ -107,8 +107,6 @@ install_claude() {
     mkdir -p "$HOME/.claude"
     cp "$DOTFILES/claude/settings.json" "$HOME/.claude/settings.json"
     cp -r "$DOTFILES/claude/skills" "$HOME/.claude/skills"
-    cp -r "$DOTFILES/claude/commands" "$HOME/.claude/commands"
-    cp -r "$DOTFILES/claude/agents" "$HOME/.claude/agents"
     echo "  [copy] claude installed"
     echo "  [hint] secrets (settings.local.json) are kept locally, not synced"
 }

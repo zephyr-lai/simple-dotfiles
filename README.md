@@ -146,14 +146,13 @@ stow 方式会自动解析工具，顺序为：
 |------|------|
 | `settings.json` | 去敏配置（模型映射、代理、权限白名单），stow 链接到 `~/.claude/` |
 | `settings.local.json.example` | 本地配置模板，复制为 `~/.claude/settings.local.json` 后填入自己的 token |
-| `skills/` | pms、ima-skill 技能（无硬编码凭证） |
-| `commands/` `agents/` | 自定义斜杠命令和 subagent（目前为空，写了就往这里放） |
+| `skills/` | pms 技能（个人维护，无硬编码凭证） |
 
 **敏感信息规则**：`~/.claude/settings.local.json` 存放 token 等秘密，永不入仓（`.gitignore` 已兜底）。仓库是 PUBLIC，提交任何改动前请自查是否包含密钥。
 
 ### 新机器恢复插件环境
 
-skills / commands / agents 随 `install.sh` 部署；插件（11 个）需联网安装，清单在 `tools/claude-plugins.md`（4 个自定义 marketplace + 插件列表）。
+skills 随 `install.sh` 部署；插件（11 个）需联网安装，清单在 `tools/claude-plugins.md`（4 个自定义 marketplace + 插件列表）。
 
 新机器完整恢复流程：`install.sh deploy all` → 复制 settings.local.json 模板填 token → 让 Claude 读 `tools/claude-plugins.md` 并按其安装（跳过已装项）。
 
