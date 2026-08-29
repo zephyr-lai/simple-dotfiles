@@ -1,21 +1,19 @@
 # simple-dotfiles
 
-轻量、开箱即用的 bash / vim / tmux 配置集合，`install.sh` 一键部署。
+轻量、开箱即用的 bash / vim / tmux / git / claude 配置集合，`install.sh` 一键部署。
 
 ## 目录结构
 
 ```
-dotfiles/
-├── bash/               ← stow 包
-│   ├── .bashrc
-│   └── .bash_aliases
-├── vim/                ← stow 包
-│   ├── .vimrc
-│   └── .vim/
-├── tmux/               ← stow 包
-│   ├── .tmux.conf
-│   └── .tmux/
-├── install.sh
+simple-dotfiles/
+├── bash/               ← stow 包：.bashrc + .bash_aliases
+├── vim/                ← stow 包：.vimrc + .vim/
+├── tmux/               ← stow 包：.tmux.conf + .tmux/
+├── git/                ← stow 包：.gitconfig
+├── claude/             ← stow 包：settings.json（去敏）+ skills/
+├── tools/stow/         ← vendored GNU stow（断网兜底，见「stow 自动安装」）
+├── install.sh          ← 唯一入口
+├── CLAUDE.md           ← 项目规则（AI 辅助开发时自动加载）
 └── README.md
 ```
 
@@ -26,41 +24,52 @@ git clone git@github.com:zephyr-lai/simple-dotfiles.git ~/simple-dotfiles
 cd ~/simple-dotfiles
 
 # stow 方式（默认，软链接，改一处仓库同步）
-./install.sh                     # 备份 + stow 全部
-./install.sh install vim stow    # 只安装 vim（不备份）
+./install.sh deploy all            # 备份 + stow 全部
+./install.sh deploy vim            # 只部署 vim
+./install.sh install claude stow   # 只安装 claude（不备份）
 
-# cp 方式（离线安全）
-./install.sh deploy all cp       # 备份 + cp 全部
-./install.sh deploy vim cp       # 只部署 vim
+# cp 方式（拷贝，仓库与 home 解耦）
+./install.sh deploy all cp         # 备份 + cp 全部
 
-source ~/.bashrc
+source ~/.bashrc                   # bash 用户刷新配置
 ```
+
+`./install.sh` 不带参数时输出帮助信息，不会执行任何操作。
+
+### stow 自动安装
+
+stow 方式会自动解析工具，顺序为：
+
+1. 系统已有 stow → 直接用
+2. 没有 → 尝试在线安装（macOS 用 brew，Linux 用 apt）
+3. 在线安装失败 → 使用仓库内置的 `tools/stow/`，安装到 `~/.local/bin/` 使其全局可用
 
 ## 命令
 
 ```
-./install.sh {backup|install|deploy|uninstall} [bash|vim|tmux|all] [{cp|stow}]
+./install.sh {backup|install|deploy|uninstall|help} [bash|vim|tmux|git|claude|all] [{cp|stow}]
 ```
 
 | 命令 | 作用 |
 |------|------|
 | `backup` | 仅备份已有配置到 `~/.dotfiles_backup/<时间戳>/` |
 | `install` | 仅安装，不备份 |
-| `deploy` | 备份 + 安装（默认） |
-| `uninstall` | 卸载配置 |
+| `deploy` | 备份 + 安装 |
+| `uninstall` | 卸载配置（claude 的本地密钥文件保留不删） |
+| `help` | 显示帮助（无参数时默认执行） |
 
 | 方法 | 作用 |
 |------|------|
-| `stow` | 软链接方式（默认，需要 `apt install stow`，改一处仓库同步） |
+| `stow` | 软链接方式（默认，改一处仓库同步） |
 | `cp` | 拷贝方式（离线安全，不需要额外依赖） |
 
 | 示例 | 效果 |
 |------|------|
-| `./install.sh` | 备份旧配置 + cp 安装全部 |
-| `./install.sh deploy vim stow` | 备份 vim + stow 链接 vim |
-| `./install.sh install tmux cp` | 仅 cp 安装 tmux |
-| `./install.sh uninstall vim stow` | stow 卸载 vim |
-| `./install.sh uninstall all cp` | 删除全部配置文件 |
+| `./install.sh` | 显示帮助 |
+| `./install.sh deploy all` | 备份 + stow 全部 |
+| `./install.sh deploy vim cp` | 备份 vim + cp 安装 vim |
+| `./install.sh install tmux` | 仅 stow 安装 tmux |
+| `./install.sh uninstall claude` | 卸载 claude（保留本地密钥） |
 | `./install.sh backup bash` | 仅备份 bash |
 
 ## bash
@@ -121,7 +130,24 @@ source ~/.bashrc
 | 回滚行数 | 2000 | 50000 |
 | 状态栏 | 默认 | Catppuccin Mocha 暗色主题，左侧 session\|window\|pane，右侧时间日期 |
 | 会话恢复 | 无 | tmux-resurrect（手动）+ tmux-continuum（自动） |
-| 复制模式 | 默认 | vi 键位（`v` 选择 `y` 复制） |
+| 复制模式 | 默认 | vi 键位（`v` 选择 `y` 复制），OSC 52 同步系统剪贴板 |
+
+## git
+
+| 配置项 | 说明 |
+|--------|------|
+| diff 工具 | vimdiff 作为 difftool |
+| 别名 `df` / `dfs` | `git difftool` / `git difftool --staged` |
+
+## claude
+
+| 文件 | 说明 |
+|------|------|
+| `settings.json` | 去敏配置（模型映射、代理、权限白名单），stow 链接到 `~/.claude/` |
+| `settings.local.json.example` | 本地配置模板，复制为 `~/.claude/settings.local.json` 后填入自己的 token |
+| `skills/` | pms、ima-skill 技能（无硬编码凭证） |
+
+**敏感信息规则**：`~/.claude/settings.local.json` 存放 token 等秘密，永不入仓（`.gitignore` 已兜底）。仓库是 PUBLIC，提交任何改动前请自查是否包含密钥。
 
 ## 插件更新
 
@@ -129,3 +155,7 @@ source ~/.bashrc
 |------|------|
 | vim | `:PlugUpdate` |
 | tmux | `prefix + U` |
+
+## 项目规则
+
+仓库根目录的 `CLAUDE.md` 描述项目规则（架构、安全红线、新增 package 清单），使用 AI 辅助开发时会自动加载。

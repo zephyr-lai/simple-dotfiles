@@ -23,10 +23,12 @@
 2. install.sh 中实现 `backup_xxx` `install_xxx` `deploy_xxx` `uninstall_xxx`（保持幂等）
 3. 接入 `backup_all` / `install_all` / `deploy_all` / `uninstall_all` 及对应 case 分支
 4. 更新 Usage / help 文案
-5. 包内敏感或本地专属文件用 `.stow-local-ignore` 排除，并加 `.gitignore` 兜底
+5. 更新 README.md（目录结构、命令、配置表）
+6. 包内敏感或本地专属文件用 `.stow-local-ignore` 排除，并加 `.gitignore` 兜底
 
 ## 约定
 
 - 脚本与配置文件注释用中文
 - commit 用英文 conventional commits（feat/fix/chore），单行 subject
 - 配置改动即改即生效（stow 软链接指向仓库）；新增顶层文件后需重跑 `./install.sh deploy all`
+- **每次提交前检查 README.md 是否需要更新**（目录结构、命令/参数、配置表、行为变化），需要时先提示用户确认，再更新 README 后一并提交
