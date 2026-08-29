@@ -1,0 +1,8 @@
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-你的-api-key"
+  },
+  "permissions": {
+    "allow": []
+  }
+}
