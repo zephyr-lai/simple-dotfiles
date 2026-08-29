@@ -67,15 +67,19 @@ install_vim() {
     echo "  [copy] vim installed"
 }
 
+tmux_reload() {
+    if [ -n "$TMUX" ]; then
+        tmux source-file "$HOME/.tmux.conf"
+        echo "  [reload] tmux config reloaded"
+    fi
+}
+
 install_tmux() {
     echo "==> install tmux"
     cp "$DOTFILES/tmux/.tmux.conf" "$HOME/.tmux.conf"
     cp -r "$DOTFILES/tmux/.tmux" "$HOME/.tmux"
     echo "  [copy] tmux installed"
-    if [ -n "$TMUX" ]; then
-        tmux source-file "$HOME/.tmux.conf"
-        echo "  [reload] tmux config reloaded"
-    fi
+    tmux_reload
 }
 
 install_git() {
@@ -84,25 +88,95 @@ install_git() {
     echo "  [copy] git installed"
 }
 
+require_stow() {
+    [ -n "${STOW:-}" ] && return 0   # already resolved, skip detection
+
+    # 1. system stow
+    if command -v stow >/dev/null 2>&1; then
+        STOW="stow"
+        return 0
+    fi
+
+    # 2. try installing online
+    echo "  [warn] stow not found, trying to install..."
+    local installed=0
+    case "$(uname -s)" in
+        Darwin)
+            if command -v brew >/dev/null 2>&1; then
+                if brew install stow >/dev/null 2>&1; then
+                    installed=1
+                else
+                    echo "  [warn] brew install stow failed"
+                fi
+            fi
+            ;;
+        Linux)
+            if command -v apt-get >/dev/null 2>&1; then
+                if sudo apt-get install -y stow >/dev/null 2>&1; then
+                    installed=1
+                else
+                    echo "  [warn] apt install stow failed"
+                fi
+            fi
+            ;;
+    esac
+    if [ "$installed" = 1 ]; then
+        STOW="stow"
+        echo "  [ok] stow installed via package manager"
+        return 0
+    fi
+    echo "  [warn] online install failed, falling back to bundled stow"
+
+    # 3. install the bundled stow so it becomes globally available
+    local bundled="$DOTFILES/tools/stow/stow"
+    if [ -x "$bundled" ]; then
+        local bindir="$HOME/.local/bin"
+        mkdir -p "$bindir"
+        ln -sf "$bundled" "$bindir/stow"
+        echo "  [ok] bundled stow installed to $bindir/stow"
+        case ":$PATH:" in
+            *":$bindir:"*)
+                STOW="stow"
+                echo "  [ok] stow is now globally available"
+                ;;
+            *)
+                STOW="$bindir/stow"
+                echo "  [warn] $bindir is not on PATH, stow only works via full path"
+                echo "  [warn] add it to make it global: export PATH=\"$bindir:\$PATH\""
+                ;;
+        esac
+        return 0
+    fi
+
+    echo "  [error] stow not found and no bundled copy available"
+    echo "  [error] install it first:"
+    case "$(uname -s)" in
+        Darwin) echo "  [error]   brew install stow" ;;
+        Linux)  echo "  [error]   apt install stow (or your distro's package manager)" ;;
+        *)      echo "  [error]   install stow via your package manager" ;;
+    esac
+    exit 1
+}
+
 stow_link() {
     local pkg="${1:-.}"
-    command -v stow >/dev/null 2>&1 || { echo "  [error] stow not found, install: apt install stow"; exit 1; }
+    require_stow
     echo "==> stow link ($pkg)"
-    cd "$DOTFILES" && stow "$pkg" -t "$HOME" -v 2>&1 | while IFS= read -r line; do echo "  [link] $line"; done
+    cd "$DOTFILES" && "$STOW" "$pkg" -t "$HOME" -v 2>&1 | while IFS= read -r line; do echo "  [link] $line"; done
 }
 
 stow_unlink() {
     local pkg="${1:-.}"
-    command -v stow >/dev/null 2>&1 || { echo "  [error] stow not found, install: apt install stow"; exit 1; }
+    require_stow
     echo "==> stow unlink ($pkg)"
-    cd "$DOTFILES" && stow -D "$pkg" -t "$HOME" -v 2>&1 | while IFS= read -r line; do echo "  [unlink] $line"; done
+    cd "$DOTFILES" && "$STOW" -D "$pkg" -t "$HOME" -v 2>&1 | while IFS= read -r line; do echo "  [unlink] $line"; done
 }
 
 install_all() {
     echo "dotfiles from: $DOTFILES"
     echo ""
     case "$METHOD" in
-        stow) stow_link bash && stow_link vim && stow_link tmux && stow_link git ;;
+        stow) stow_link bash && stow_link vim && stow_link tmux && tmux_reload && stow_link git ;;
         *)
             install_bash
             install_vim
@@ -179,7 +253,11 @@ deploy_tmux() {
     echo "==> deploy tmux"
     backup_file .tmux.conf
     backup_file .tmux
-    [ "$METHOD" = "stow" ] && stow_link tmux || install_tmux
+    if [ "$METHOD" = "stow" ]; then
+        stow_link tmux && tmux_reload
+    else
+        install_tmux
+    fi
 }
 
 deploy_git() {
@@ -201,9 +279,14 @@ deploy_all() {
 }
 
 # === main ===
-cmd="${1:-deploy}"
+cmd="${1:-help}"
 tool="${2:-all}"
 METHOD="${3:-stow}"
+
+# check stow before backup runs (backup itself doesn't need it)
+case "$cmd" in
+    install|deploy|uninstall) [ "$METHOD" = "stow" ] && require_stow ;;
+esac
 
 case "$cmd" in
     backup)
@@ -220,7 +303,7 @@ case "$cmd" in
         case "$tool" in
             bash) [ "$METHOD" = "stow" ] && stow_link bash || install_bash ;;
             vim)  [ "$METHOD" = "stow" ] && stow_link vim  || install_vim ;;
-            tmux) [ "$METHOD" = "stow" ] && stow_link tmux || install_tmux ;;
+            tmux) if [ "$METHOD" = "stow" ]; then stow_link tmux && tmux_reload; else install_tmux; fi ;;
             git)  [ "$METHOD" = "stow" ] && stow_link git  || install_git ;;
             all)  install_all ;;
             *)    echo "Usage: $0 install {bash|vim|tmux|git|all} [{cp|stow}]" && exit 1 ;;
@@ -246,16 +329,23 @@ case "$cmd" in
             *)    echo "Usage: $0 uninstall {bash|vim|tmux|git|all} [{cp|stow}]" && exit 1 ;;
         esac
         ;;
-    *)
-        echo "Usage: $0 {backup|install|deploy|uninstall} [bash|vim|tmux|all] [{cp|stow}]"
+    help)
+        echo "Usage: $0 {backup|install|deploy|uninstall} [bash|vim|tmux|git|all] [{cp|stow}]"
         echo ""
         echo "  backup    仅备份已有配置"
         echo "  install   仅安装（不备份）"
-        echo "  deploy    备份 + 安装（默认）"
+        echo "  deploy    备份 + 安装"
         echo "  uninstall 卸载配置"
+        echo "  help      显示本帮助"
         echo ""
         echo "  cp        拷贝方式（离线安全）"
         echo "  stow      软链接方式（默认，改一处仓库同步）"
+        exit 0
+        ;;
+    *)
+        echo "Unknown command: $cmd"
+        echo ""
+        echo "Usage: $0 {backup|install|deploy|uninstall} [bash|vim|tmux|git|all] [{cp|stow}]"
         exit 1
         ;;
 esac
