@@ -12,7 +12,7 @@ simple-dotfiles/
 ├── git/                ← stow 包：.gitconfig
 ├── claude/             ← stow 包：settings.json（去敏）+ skills/ + commands/ + agents/
 ├── tools/stow/         ← vendored GNU stow（断网兜底，见「stow 自动安装」）
-├── tools/claude-restore.sh ← 新机器恢复 Claude Code 插件环境
+├── tools/claude-plugins.json ← 插件/marketplace 恢复清单（让 Claude 按此安装）
 ├── install.sh          ← 唯一入口
 ├── CLAUDE.md           ← 项目规则（AI 辅助开发时自动加载）
 └── README.md
@@ -153,13 +153,9 @@ stow 方式会自动解析工具，顺序为：
 
 ### 新机器恢复插件环境
 
-skills / commands / agents 随 `install.sh` 部署，插件（11 个）需联网安装：
+skills / commands / agents 随 `install.sh` 部署；插件（11 个）需联网安装，清单在 `tools/claude-plugins.json`（4 个自定义 marketplace + 插件列表）。
 
-```bash
-./tools/claude-restore.sh
-```
-
-脚本幂等：先注册自定义 marketplace（planning-with-files、ui-ux-pro-max、anthropic-agent-skills、karpathy-skills），再安装各插件（superpowers、code-review、code-simplifier、ralph-loop、frontend-design、skill-creator 等），已安装的自动跳过。新机器完整恢复流程：`install.sh deploy all` → 复制 settings.local.json 模板填 token → 跑本脚本。
+新机器完整恢复流程：`install.sh deploy all` → 复制 settings.local.json 模板填 token → 让 Claude 读 `tools/claude-plugins.json` 并按其安装（跳过已装项）。
 
 ## 插件更新
 

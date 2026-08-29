@@ -111,7 +111,6 @@ install_claude() {
     cp -r "$DOTFILES/claude/agents" "$HOME/.claude/agents"
     echo "  [copy] claude installed"
     echo "  [hint] secrets (settings.local.json) are kept locally, not synced"
-    echo "  [hint] restore plugins: $DOTFILES/tools/claude-restore.sh"
 }
 
 require_stow() {
