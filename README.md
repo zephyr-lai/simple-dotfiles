@@ -1,6 +1,6 @@
 # simple-dotfiles
 
-轻量、开箱即用的 bash / vim / tmux / git / claude 配置集合，`install.sh` 一键部署。
+轻量、开箱即用的 bash / vim / tmux / git 配置集合，`install.sh` 一键部署。
 
 ## 目录结构
 
@@ -10,9 +10,8 @@ simple-dotfiles/
 ├── vim/                ← stow 包：.vimrc + .vim/
 ├── tmux/               ← stow 包：.tmux.conf + .tmux/
 ├── git/                ← stow 包：.gitconfig
-├── claude/             ← stow 包：settings.json（去敏）+ skills/ + commands/ + agents/
 ├── tools/stow/         ← vendored GNU stow（断网兜底，见「stow 自动安装」）
-├── tools/claude-plugins.md ← 插件/marketplace 恢复清单（让 Claude 按此安装）
+├── tools/claude-plugins.md ← Claude Code 插件恢复清单（让 Claude 按此安装）
 ├── install.sh          ← 唯一入口
 ├── CLAUDE.md           ← 项目规则（AI 辅助开发时自动加载）
 └── README.md
@@ -27,7 +26,6 @@ cd ~/simple-dotfiles
 # stow 方式（默认，软链接，改一处仓库同步）
 ./install.sh deploy all            # 备份 + stow 全部
 ./install.sh deploy vim            # 只部署 vim
-./install.sh install claude stow   # 只安装 claude（不备份）
 
 # cp 方式（拷贝，仓库与 home 解耦）
 ./install.sh deploy all cp         # 备份 + cp 全部
@@ -48,7 +46,7 @@ stow 方式会自动解析工具，顺序为：
 ## 命令
 
 ```
-./install.sh {backup|install|deploy|uninstall|help} [bash|vim|tmux|git|claude|all] [{cp|stow}]
+./install.sh {backup|install|deploy|uninstall|help} [bash|vim|tmux|git|all] [{cp|stow}]
 ```
 
 | 命令 | 作用 |
@@ -56,7 +54,7 @@ stow 方式会自动解析工具，顺序为：
 | `backup` | 仅备份已有配置到 `~/.dotfiles_backup/<时间戳>/` |
 | `install` | 仅安装，不备份 |
 | `deploy` | 备份 + 安装 |
-| `uninstall` | 卸载配置（claude 的本地密钥文件保留不删） |
+| `uninstall` | 卸载配置 |
 | `help` | 显示帮助（无参数时默认执行） |
 
 | 方法 | 作用 |
@@ -70,7 +68,6 @@ stow 方式会自动解析工具，顺序为：
 | `./install.sh deploy all` | 备份 + stow 全部 |
 | `./install.sh deploy vim cp` | 备份 vim + cp 安装 vim |
 | `./install.sh install tmux` | 仅 stow 安装 tmux |
-| `./install.sh uninstall claude` | 卸载 claude（保留本地密钥） |
 | `./install.sh backup bash` | 仅备份 bash |
 
 ## bash
@@ -140,21 +137,9 @@ stow 方式会自动解析工具，顺序为：
 | diff 工具 | vimdiff 作为 difftool |
 | 别名 `df` / `dfs` | `git difftool` / `git difftool --staged` |
 
-## claude
+## Claude Code 插件恢复
 
-| 文件 | 说明 |
-|------|------|
-| `settings.json` | 去敏配置（模型映射、代理、权限白名单），stow 链接到 `~/.claude/` |
-| `settings.local.json.example` | 本地配置模板，复制为 `~/.claude/settings.local.json` 后填入自己的 token |
-| `skills/` | pms 技能（个人维护，无硬编码凭证） |
-
-**敏感信息规则**：`~/.claude/settings.local.json` 存放 token 等秘密，永不入仓（`.gitignore` 已兜底）。仓库是 PUBLIC，提交任何改动前请自查是否包含密钥。
-
-### 新机器恢复插件环境
-
-skills 随 `install.sh` 部署；插件（11 个）需联网安装，清单在 `tools/claude-plugins.md`（4 个自定义 marketplace + 插件列表）。
-
-新机器完整恢复流程：`install.sh deploy all` → 复制 settings.local.json 模板填 token → 让 Claude 读 `tools/claude-plugins.md` 并按其安装（跳过已装项）。
+插件清单在 `tools/claude-plugins.md`（4 个自定义 marketplace + 11 个插件）。新机器上让 Claude 读该文件并按其安装（跳过已装项）。
 
 ## 插件更新
 

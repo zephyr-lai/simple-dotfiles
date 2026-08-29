@@ -40,19 +40,6 @@ backup_git() {
     backup_file .gitconfig
 }
 
-backup_claude() {
-    echo "==> backup claude"
-    local dest="$BACKUP_DIR/.claude"
-    for f in settings.json skills/ima-skill skills/pms; do
-        local src="$HOME/.claude/$f"
-        if [ -e "$src" ] || [ -L "$src" ]; then
-            mkdir -p "$dest/$(dirname "$f")"
-            mv "$src" "$dest/$f"
-            echo "  [backup] $src → $dest/$f"
-        fi
-    done
-}
-
 backup_all() {
     echo "backup to: $BACKUP_DIR"
     echo ""
@@ -60,7 +47,6 @@ backup_all() {
     backup_vim
     backup_tmux
     backup_git
-    backup_claude
     echo ""
     echo "Backup done."
 }
@@ -100,15 +86,6 @@ install_git() {
     echo "==> install git"
     cp "$DOTFILES/git/.gitconfig" "$HOME/.gitconfig"
     echo "  [copy] git installed"
-}
-
-install_claude() {
-    echo "==> install claude"
-    mkdir -p "$HOME/.claude"
-    cp "$DOTFILES/claude/settings.json" "$HOME/.claude/settings.json"
-    cp -r "$DOTFILES/claude/skills" "$HOME/.claude/skills"
-    echo "  [copy] claude installed"
-    echo "  [hint] secrets (settings.local.json) are kept locally, not synced"
 }
 
 require_stow() {
@@ -199,13 +176,12 @@ install_all() {
     echo "dotfiles from: $DOTFILES"
     echo ""
     case "$METHOD" in
-        stow) stow_link bash && stow_link vim && stow_link tmux && tmux_reload && stow_link git && stow_link claude ;;
+        stow) stow_link bash && stow_link vim && stow_link tmux && tmux_reload && stow_link git ;;
         *)
             install_bash
             install_vim
             install_tmux
             install_git
-            install_claude
             ;;
     esac
     echo ""
@@ -246,20 +222,12 @@ uninstall_git() {
     remove_file .gitconfig
 }
 
-uninstall_claude() {
-    echo "==> uninstall claude"
-    remove_file .claude/settings.json
-    remove_file .claude/skills/ima-skill
-    remove_file .claude/skills/pms
-    echo "  [keep] .claude/settings.local.json (local secrets) left untouched"
-}
-
 uninstall_all() {
     echo "dotfiles from: $DOTFILES"
     echo ""
     case "$METHOD" in
-        stow) stow_unlink bash && stow_unlink vim && stow_unlink tmux && stow_unlink git && stow_unlink claude ;;
-        *)    uninstall_bash && uninstall_vim && uninstall_tmux && uninstall_git && uninstall_claude ;;
+        stow) stow_unlink bash && stow_unlink vim && stow_unlink tmux && stow_unlink git ;;
+        *)    uninstall_bash && uninstall_vim && uninstall_tmux && uninstall_git ;;
     esac
     echo ""
     echo "Uninstall done."
@@ -298,12 +266,6 @@ deploy_git() {
     [ "$METHOD" = "stow" ] && stow_link git || install_git
 }
 
-deploy_claude() {
-    echo "==> deploy claude"
-    backup_claude
-    [ "$METHOD" = "stow" ] && stow_link claude || install_claude
-}
-
 deploy_all() {
     echo "dotfiles from: $DOTFILES"
     echo "backup to:    $BACKUP_DIR"
@@ -312,7 +274,6 @@ deploy_all() {
     deploy_vim
     deploy_tmux
     deploy_git
-    deploy_claude
     echo ""
     echo "All done. Run: source ~/.bashrc"
 }
@@ -330,50 +291,46 @@ esac
 case "$cmd" in
     backup)
         case "$tool" in
-            bash)   backup_bash ;;
-            vim)    backup_vim ;;
-            tmux)   backup_tmux ;;
-            git)    backup_git ;;
-            claude) backup_claude ;;
-            all)    backup_all ;;
-            *)      echo "Usage: $0 backup {bash|vim|tmux|git|claude|all}" && exit 1 ;;
+            bash) backup_bash ;;
+            vim)  backup_vim ;;
+            tmux) backup_tmux ;;
+            git)  backup_git ;;
+            all)  backup_all ;;
+            *)    echo "Usage: $0 backup {bash|vim|tmux|git|all}" && exit 1 ;;
         esac
         ;;
     install)
         case "$tool" in
-            bash)   [ "$METHOD" = "stow" ] && stow_link bash   || install_bash ;;
-            vim)    [ "$METHOD" = "stow" ] && stow_link vim    || install_vim ;;
-            tmux)   if [ "$METHOD" = "stow" ]; then stow_link tmux && tmux_reload; else install_tmux; fi ;;
-            git)    [ "$METHOD" = "stow" ] && stow_link git    || install_git ;;
-            claude) [ "$METHOD" = "stow" ] && stow_link claude || install_claude ;;
-            all)    install_all ;;
-            *)      echo "Usage: $0 install {bash|vim|tmux|git|claude|all} [{cp|stow}]" && exit 1 ;;
+            bash) [ "$METHOD" = "stow" ] && stow_link bash || install_bash ;;
+            vim)  [ "$METHOD" = "stow" ] && stow_link vim  || install_vim ;;
+            tmux) if [ "$METHOD" = "stow" ]; then stow_link tmux && tmux_reload; else install_tmux; fi ;;
+            git)  [ "$METHOD" = "stow" ] && stow_link git  || install_git ;;
+            all)  install_all ;;
+            *)    echo "Usage: $0 install {bash|vim|tmux|git|all} [{cp|stow}]" && exit 1 ;;
         esac
         ;;
     deploy)
         case "$tool" in
-            bash)   deploy_bash ;;
-            vim)    deploy_vim ;;
-            tmux)   deploy_tmux ;;
-            git)    deploy_git ;;
-            claude) deploy_claude ;;
-            all)    deploy_all ;;
-            *)      echo "Usage: $0 deploy {bash|vim|tmux|git|claude|all} [{cp|stow}]" && exit 1 ;;
+            bash) deploy_bash ;;
+            vim)  deploy_vim ;;
+            tmux) deploy_tmux ;;
+            git)  deploy_git ;;
+            all)  deploy_all ;;
+            *)    echo "Usage: $0 deploy {bash|vim|tmux|git|all} [{cp|stow}]" && exit 1 ;;
         esac
         ;;
     uninstall)
         case "$tool" in
-            bash)   [ "$METHOD" = "stow" ] && stow_unlink bash   || uninstall_bash ;;
-            vim)    [ "$METHOD" = "stow" ] && stow_unlink vim    || uninstall_vim ;;
-            tmux)   [ "$METHOD" = "stow" ] && stow_unlink tmux   || uninstall_tmux ;;
-            git)    [ "$METHOD" = "stow" ] && stow_unlink git    || uninstall_git ;;
-            claude) [ "$METHOD" = "stow" ] && stow_unlink claude || uninstall_claude ;;
-            all)    uninstall_all ;;
-            *)      echo "Usage: $0 uninstall {bash|vim|tmux|git|claude|all} [{cp|stow}]" && exit 1 ;;
+            bash) [ "$METHOD" = "stow" ] && stow_unlink bash || uninstall_bash ;;
+            vim)  [ "$METHOD" = "stow" ] && stow_unlink vim  || uninstall_vim ;;
+            tmux) [ "$METHOD" = "stow" ] && stow_unlink tmux || uninstall_tmux ;;
+            git)  [ "$METHOD" = "stow" ] && stow_unlink git  || uninstall_git ;;
+            all)  uninstall_all ;;
+            *)    echo "Usage: $0 uninstall {bash|vim|tmux|git|all} [{cp|stow}]" && exit 1 ;;
         esac
         ;;
     help)
-        echo "Usage: $0 {backup|install|deploy|uninstall} [bash|vim|tmux|git|claude|all] [{cp|stow}]"
+        echo "Usage: $0 {backup|install|deploy|uninstall} [bash|vim|tmux|git|all] [{cp|stow}]"
         echo ""
         echo "  backup    仅备份已有配置"
         echo "  install   仅安装（不备份）"
@@ -388,7 +345,7 @@ case "$cmd" in
     *)
         echo "Unknown command: $cmd"
         echo ""
-        echo "Usage: $0 {backup|install|deploy|uninstall} [bash|vim|tmux|git|claude|all] [{cp|stow}]"
+        echo "Usage: $0 {backup|install|deploy|uninstall} [bash|vim|tmux|git|all] [{cp|stow}]"
         exit 1
         ;;
 esac
