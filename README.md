@@ -139,7 +139,7 @@ stow 方式会自动解析工具，顺序为：
 
 ## Claude Code 插件恢复
 
-插件清单在 `tools/claude-plugins.md`（4 个自定义 marketplace + 11 个插件）。新机器上让 Claude 读该文件并按其安装（跳过已装项）。
+插件清单在 `tools/claude-plugins.md`（5 个自定义 marketplace + 12 个插件，含每个市场的注册命令）。新机器上让 Claude 读该文件并按其安装（先 `claude plugin list` 查现状，已装的跳过）。
 
 ## 插件更新
 
@@ -147,6 +147,7 @@ stow 方式会自动解析工具，顺序为：
 |------|------|
 | vim | `:PlugUpdate` |
 | tmux | `prefix + U` |
+| claude 插件 | `claude plugin update <插件名>@<市场名>`（重启 Claude Code 生效） |
 
 ## 项目规则
 
