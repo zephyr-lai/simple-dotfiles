@@ -12,3 +12,5 @@
 [user]
 	name = zephyrus
 	email = zhipinglai@qq.com
+[credential]
+	helper = store
