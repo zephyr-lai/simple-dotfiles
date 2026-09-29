@@ -55,6 +55,7 @@ backup_all() {
 
 install_bash() {
     echo "==> install bash"
+require_blesh
     cp "$DOTFILES/bash/.bashrc" "$HOME/.bashrc"
     cp "$DOTFILES/bash/.bash_aliases" "$HOME/.bash_aliases"
     echo "  [copy] bash installed"
@@ -158,6 +159,35 @@ require_stow() {
     exit 1
 }
 
+require_blesh() {
+# ble.sh: bash 幽灵字自动补全(可选增强,失败不阻塞安装)
+for _d in "$HOME/.local/share/blesh" /usr/local/share/blesh /usr/share/blesh; do
+[ -f "$_d/ble.sh" ] && return 0
+done
+echo "  [warn] ble.sh not found, trying to install (bash ghost-text autosuggestions)..."
+command -v git >/dev/null 2>&1 || { echo "  [warn] git not found, skip ble.sh"; return 0; }
+if ! command -v gawk >/dev/null 2>&1; then
+case "$(uname -s)" in
+Darwin) command -v brew >/dev/null 2>&1 && brew install gawk >/dev/null 2>&1 ;;
+Linux)  command -v apt-get >/dev/null 2>&1 && sudo apt-get install -y gawk >/dev/null 2>&1 ;;
+esac
+fi
+command -v gawk >/dev/null 2>&1 || { echo "  [warn] gawk not available, skip ble.sh"; return 0; }
+case "$(uname -s)" in
+Darwin) [ "${BASH_VERSION%%.*}" -ge 4 ] 2>/dev/null || \
+  echo "  [warn] macOS stock bash 3.2 cannot load ble.sh; run: brew install bash" ;;
+esac
+rm -rf /tmp/ble.sh
+git clone --recursive --depth 1 https://github.com/akinomyoga/ble.sh.git /tmp/ble.sh >/dev/null 2>&1
+if make -C /tmp/ble.sh install PREFIX="$HOME/.local" >/dev/null 2>&1 && [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
+echo "  [ok] ble.sh installed to ~/.local/share/blesh"
+else
+echo "  [warn] ble.sh install failed, bash still works (without ghost suggestions)"
+fi
+rm -rf /tmp/ble.sh
+return 0
+}
+
 stow_link() {
     local pkg="${1:-.}"
     require_stow
@@ -176,7 +206,7 @@ install_all() {
     echo "dotfiles from: $DOTFILES"
     echo ""
     case "$METHOD" in
-        stow) stow_link bash && stow_link vim && stow_link tmux && tmux_reload && stow_link git ;;
+        stow) stow_link bash && require_blesh && stow_link vim && stow_link tmux && tmux_reload && stow_link git ;;
         *)
             install_bash
             install_vim
@@ -239,6 +269,7 @@ deploy_bash() {
     echo "==> deploy bash"
     backup_file .bashrc
     backup_file .bash_aliases
+require_blesh
     [ "$METHOD" = "stow" ] && stow_link bash || install_bash
 }
 

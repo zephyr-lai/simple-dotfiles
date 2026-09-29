@@ -5,6 +5,18 @@ case $- in
     *i*) ;;
       *) return;;
 esac
+# === ble.sh 幽灵字自动补全(需安装,未装自动跳过;安装见 install.sh 的 require_blesh) ===
+# 输入时灰色历史建议,→ 采纳整句、Alt+f 逐词;ble.sh 需在 .bashrc 顶部 source、末尾 attach
+# ble.sh 仅支持 bash>=4(macOS 自带 3.2 会静默失败,先 brew install bash)
+if [ "${BASH_VERSION%%.*}" -ge 4 ] 2>/dev/null; then
+for _blesh in "$HOME/.local/share/blesh/ble.sh" /usr/local/share/blesh/ble.sh /usr/share/blesh/ble.sh; do
+  if [ -f "$_blesh" ]; then
+    source "$_blesh" --noattach
+    break
+  fi
+done
+unset _blesh
+fi
 
 # === history ===
 HISTCONTROL=ignoreboth              # ignore duplicate lines
@@ -93,3 +105,6 @@ fi
 # === PATH ===
 export PATH="$HOME/.local/bin:$PATH"
 export PATH=~/.npm-global/bin:$PATH
+
+# === 附加 ble.sh(与顶部 source 配对,须在 .bashrc 末尾) ===
+[ -n "${BLE_VERSION:-}" ] && ble-attach
