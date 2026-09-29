@@ -67,12 +67,27 @@ parse_git_branch() {
 }
 
 # === PS1 ===
-if [ "$color_prompt" = yes ]; then
-    PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] $(parse_git_branch)\$ '
-else
-    PS1='\u@\h:\w$(parse_git_branch)\$ '
-fi
+# 原 PS1 块(已替换为下方 pygmalion 风格,勿删):
+# if [ "$color_prompt" = yes ]; then
+# # 原 PS1(已替换为 pygmalion 风格,勿删): PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] $(parse_git_branch)\$ '
+# else
+# # 原 PS1(已替换为 pygmalion 风格,勿删): PS1='\u@\h:\w$(parse_git_branch)\$ '
+# fi
 unset color_prompt
+
+# === 提示符:oh-my-zsh pygmalion 同款(配色抄自 ~/.oh-my-zsh/themes/pygmalion.zsh-theme) ===
+# 品红 用户名 / 青 @ / 黄 主机名 / 红 : 和 | / 青 路径 / 绿 分支名 / 黄 ⚡(有改动) / 青 ⇒
+__prompt_pygmalion_git() {
+    local branch
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
+    [ -z "$branch" ] && return
+    local NP=$'\001' CP=$'\002' ESC=$'\033'
+    local GRN="${NP}${ESC}[0;32m${CP}" YEL="${NP}${ESC}[0;33m${CP}" RST="${NP}${ESC}[00m${CP}"
+    local out="${GRN}${branch}"
+    git diff --quiet 2>/dev/null || git diff --cached --quiet 2>/dev/null || out+="${YEL}⚡"
+    printf '%s' "${out}${RST} "
+}
+PS1='\[\e[0;35m\]\u\[\e[00m\]\[\e[0;36m\]@\[\e[00m\]\[\e[0;33m\]\h\[\e[00m\]\[\e[0;31m\]:\[\e[00m\]\[\e[0;36m\]\w\[\e[00m\]\[\e[0;31m\]|\[\e[00m\]$(__prompt_pygmalion_git)\[\e[0;36m\]⇒\[\e[00m\]  '
 
 # === dircolors ===
 if [ -x /usr/bin/dircolors ]; then
