@@ -11,6 +11,7 @@ simple-dotfiles/
 ├── tmux/               ← stow 包：.tmux.conf + .tmux/
 ├── git/                ← stow 包：.gitconfig
 ├── tools/stow/         ← vendored GNU stow（断网兜底，见「stow 自动安装」）
+├── tools/blesh/        ← vendored ble.sh 构建产物（断网兜底，见「ble.sh 自动安装」）
 ├── tools/restore-plugins.sh ← Claude Code 插件清单兼一键恢复脚本（全新机器直接运行）
 ├── install.sh          ← 唯一入口
 ├── CLAUDE.md           ← 项目规则（AI 辅助开发时自动加载）
@@ -42,6 +43,14 @@ stow 方式会自动解析工具，顺序为：
 1. 系统已有 stow → 直接用
 2. 没有 → 尝试在线安装（macOS 用 brew，Linux 用 apt）
 3. 在线安装失败 → 使用仓库内置的 `tools/stow/`，安装到 `~/.local/bin/` 使其全局可用
+
+### ble.sh 自动安装
+
+bash 的幽灵字补全依赖 ble.sh（可选增强，装不上不影响使用），安装顺序为：
+
+1. 系统已有 ble.sh → 跳过
+2. 没有 → 尝试在线安装（clone 源码 + make 到 `~/.local/share/blesh`，需 git/gawk）
+3. 在线安装失败/断网 → 直接拷贝仓库内置的 `tools/blesh/` 构建产物
 
 ## 命令
 

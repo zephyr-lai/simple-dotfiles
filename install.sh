@@ -160,32 +160,51 @@ require_stow() {
 }
 
 require_blesh() {
-# ble.sh: bash 幽灵字自动补全(可选增强,失败不阻塞安装)
-for _d in "$HOME/.local/share/blesh" /usr/local/share/blesh /usr/share/blesh; do
-[ -f "$_d/ble.sh" ] && return 0
-done
-echo "  [warn] ble.sh not found, trying to install (bash ghost-text autosuggestions)..."
-command -v git >/dev/null 2>&1 || { echo "  [warn] git not found, skip ble.sh"; return 0; }
-if ! command -v gawk >/dev/null 2>&1; then
-case "$(uname -s)" in
-Darwin) command -v brew >/dev/null 2>&1 && brew install gawk >/dev/null 2>&1 ;;
-Linux)  command -v apt-get >/dev/null 2>&1 && sudo apt-get install -y gawk >/dev/null 2>&1 ;;
-esac
-fi
-command -v gawk >/dev/null 2>&1 || { echo "  [warn] gawk not available, skip ble.sh"; return 0; }
-case "$(uname -s)" in
-Darwin) [ "${BASH_VERSION%%.*}" -ge 4 ] 2>/dev/null || \
-  echo "  [warn] macOS stock bash 3.2 cannot load ble.sh; run: brew install bash" ;;
-esac
-rm -rf /tmp/ble.sh
-git clone --recursive --depth 1 https://github.com/akinomyoga/ble.sh.git /tmp/ble.sh >/dev/null 2>&1
-if make -C /tmp/ble.sh install PREFIX="$HOME/.local" >/dev/null 2>&1 && [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
-echo "  [ok] ble.sh installed to ~/.local/share/blesh"
-else
-echo "  [warn] ble.sh install failed, bash still works (without ghost suggestions)"
-fi
-rm -rf /tmp/ble.sh
-return 0
+    # ble.sh: bash 幽灵字自动补全(可选增强,失败不阻塞安装)
+    # 安装顺序: 已装 → 跳过; 在线 clone+make; 断网/失败回退仓库内置 tools/blesh
+    local _d
+    for _d in "$HOME/.local/share/blesh" /usr/local/share/blesh /usr/share/blesh; do
+        [ -f "$_d/ble.sh" ] && return 0
+    done
+    echo "  [warn] ble.sh not found, trying to install (bash ghost-text autosuggestions)..."
+
+    # 1) 在线安装(clone 源码 + make,需 git/gawk);全放条件上下文,set -e 下断网不能中止脚本
+    if command -v git >/dev/null 2>&1; then
+        if ! command -v gawk >/dev/null 2>&1; then
+            case "$(uname -s)" in
+                Darwin) command -v brew >/dev/null 2>&1 && brew install gawk >/dev/null 2>&1 || true ;;
+                Linux)  command -v apt-get >/dev/null 2>&1 && sudo apt-get install -y gawk >/dev/null 2>&1 || true ;;
+            esac
+        fi
+        if command -v gawk >/dev/null 2>&1; then
+            case "$(uname -s)" in
+                Darwin) [ "${BASH_VERSION%%.*}" -ge 4 ] 2>/dev/null || \
+                  echo "  [warn] macOS stock bash 3.2 cannot load ble.sh; run: brew install bash" ;;
+            esac
+            rm -rf /tmp/ble.sh
+            if git clone --recursive --depth 1 https://github.com/akinomyoga/ble.sh.git /tmp/ble.sh >/dev/null 2>&1 \
+               && make -C /tmp/ble.sh install PREFIX="$HOME/.local" >/dev/null 2>&1 \
+               && [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
+                echo "  [ok] ble.sh installed to ~/.local/share/blesh"
+                rm -rf /tmp/ble.sh
+                return 0
+            fi
+            rm -rf /tmp/ble.sh
+            echo "  [warn] online install failed, falling back to bundled copy"
+        fi
+    fi
+
+    # 2) 离线兜底: 直接拷贝仓库内置构建产物(无需网络/git/gawk)
+    if [ -f "$DOTFILES/tools/blesh/ble.sh" ]; then
+        mkdir -p "$HOME/.local/share"
+        rm -rf "$HOME/.local/share/blesh"
+        cp -r "$DOTFILES/tools/blesh" "$HOME/.local/share/blesh" \
+            && [ -f "$HOME/.local/share/blesh/ble.sh" ] \
+            && { echo "  [ok] ble.sh installed from bundled copy ($DOTFILES/tools/blesh)"; return 0; }
+    fi
+
+    echo "  [warn] ble.sh install failed, bash still works (without ghost suggestions)"
+    return 0
 }
 
 stow_link() {
