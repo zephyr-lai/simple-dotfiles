@@ -84,7 +84,9 @@ __prompt_pygmalion_git() {
     local NP=$'\001' CP=$'\002' ESC=$'\033'
     local GRN="${NP}${ESC}[0;32m${CP}" YEL="${NP}${ESC}[0;33m${CP}" RST="${NP}${ESC}[00m${CP}"
     local out="${GRN}${branch}"
-    git diff --quiet 2>/dev/null || git diff --cached --quiet 2>/dev/null || out+="${YEL}⚡"
+    # 脏口径与 zsh parse_git_dirty 一致:staged / unstaged / 未跟踪任一即脏
+    git diff --quiet 2>/dev/null && git diff --cached --quiet 2>/dev/null \
+        && [ -z "$(git ls-files --other --exclude-standard 2>/dev/null)" ] || out+="${YEL}⚡"
     printf '%s' "${out}${RST} "
 }
 PS1='\[\e[0;35m\]\u\[\e[00m\]\[\e[0;36m\]@\[\e[00m\]\[\e[0;33m\]\h\[\e[00m\]\[\e[0;31m\]:\[\e[00m\]\[\e[0;36m\]\w\[\e[00m\]\[\e[0;31m\]|\[\e[00m\]$(__prompt_pygmalion_git)\[\e[0;36m\]⇒\[\e[00m\]  '
