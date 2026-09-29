@@ -11,7 +11,7 @@ simple-dotfiles/
 ├── tmux/               ← stow 包：.tmux.conf + .tmux/
 ├── git/                ← stow 包：.gitconfig
 ├── tools/stow/         ← vendored GNU stow（断网兜底，见「stow 自动安装」）
-├── tools/claude-plugins.md ← Claude Code 插件恢复清单（让 Claude 按此安装）
+├── tools/restore-plugins.sh ← Claude Code 插件清单兼一键恢复脚本（全新机器直接运行）
 ├── install.sh          ← 唯一入口
 ├── CLAUDE.md           ← 项目规则（AI 辅助开发时自动加载）
 └── README.md
@@ -139,7 +139,7 @@ stow 方式会自动解析工具，顺序为：
 
 ## Claude Code 插件恢复
 
-插件清单在 `tools/claude-plugins.md`（5 个自定义 marketplace + 12 个插件，含每个市场的注册命令）。新机器上让 Claude 读该文件并按其安装（先 `claude plugin list` 查现状，已装的跳过）。
+插件清单和一键恢复脚本在 `tools/restore-plugins.sh`（6 个自定义 marketplace + 13 个插件，用途写在行内注释）。全新机器直接 `bash tools/restore-plugins.sh`；部分恢复先 `claude plugin list` 查现状，已装的跳过，缺什么对照脚本补。
 
 ## 插件更新
 
