@@ -6,7 +6,7 @@
 
 ```
 simple-dotfiles/
-├── bash/               ← stow 包：.bashrc + .bash_aliases
+├── bash/               ← stow 包：.bashrc + .bash_profile + .bash_aliases
 ├── vim/                ← stow 包：.vimrc + .vim/
 ├── tmux/               ← stow 包：.tmux.conf + .tmux/
 ├── git/                ← stow 包：.gitconfig
@@ -74,6 +74,7 @@ stow 方式会自动解析工具，顺序为：
 
 | 配置项 | 默认 | 配置后 |
 |--------|------|--------|
+| 登录 shell 加载 | 只读 `.profile`，`.bashrc` 不生效 | `.bash_profile` 交互式转交 `.bashrc`（Terminal 直开 / tmux / `bash -l` 全套生效） |
 | 命令提示符 | `user@host:~/dir$` | pygmalion 同款彩色：品红用户名 / 青 @、路径、⇒ / 黄主机名 / 红 `:` 与 `\|` |
 | git 分支显示 | 无 | 路径后红 `\|` + 绿分支名（仿 oh-my-zsh pygmalion） |
 | git 状态提示 | 无 | 有改动时分支后黄色 `⚡` |

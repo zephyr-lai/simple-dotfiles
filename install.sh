@@ -269,6 +269,7 @@ deploy_bash() {
     echo "==> deploy bash"
     backup_file .bashrc
     backup_file .bash_aliases
+    backup_file .bash_profile
 require_blesh
     [ "$METHOD" = "stow" ] && stow_link bash || install_bash
 }
