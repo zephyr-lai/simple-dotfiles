@@ -88,10 +88,6 @@ case "$PROMPT_STYLE" in
         ;;
 esac
 
-# === PATH ===
-BIN_PATH="$HOME/.npm-global/bin:$HOME/.local/bin"   # 排在系统 PATH 前面,优先级更高
-export PATH="$BIN_PATH:$PATH"
-
 # === 别名 / 补全 ===
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
@@ -104,6 +100,10 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+# === PATH ===
+BIN_PATH="$HOME/.npm-global/bin:$HOME/.local/bin"   # 排在系统 PATH 前面,优先级更高
+export PATH="$BIN_PATH:$PATH"
 
 # === 附加 ble.sh(与顶部 source 配对,须在 .bashrc 末尾) ===
 if [ -n "${BLE_VERSION:-}" ]; then
