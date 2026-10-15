@@ -87,7 +87,7 @@ bash 的幽灵字补全依赖 ble.sh（可选增强，装不上不影响使用�
 | 配色方案 | 固定单套 | `.bashrc` 顶部 `PROMPT_STYLE` 一行切换：`green` / `pygmalion` |
 | 命令提示符 | `user@host:~/dir$` | green：亮绿 `user@host` + 蓝路径 + 黄 `(分支)`；pygmalion：品红用户名 / 青路径 / 绿分支 / 青 ⇒ |
 | git 状态提示 | 无 | green：红 `*` `+` `?` `↑n` `↓n`；pygmalion：黄 `⚡` |
-| 常用 alias | 无 | `..` `...` `ll` `c` `h` `ports` `rp` `reload` 等 20 个 |
+| 常用 alias | 无 | `..` `...` `ll` `c` `h` `ports` `rp` `reload` 等 20 个（GNU 平台另加 4 个 `ls`/`grep` 颜色别名） |
 | 历史记录 | 默认 | 去重 + 追加模式 |
 | 幽灵字自动补全 | 无 | 输入时灰色历史建议，→ 采纳整句（ble.sh；需 bash ≥ 4，macOS 先 `brew install bash`） |
 

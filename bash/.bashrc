@@ -37,8 +37,8 @@ shopt -s checkwinsize               # 窗口缩放时刷新 LINES/COLUMNS
 # === 提示符 ===
 # 两套配色的 git 函数分开常驻(各查各的,互不拖累),由顶部 PROMPT_STYLE 选 PS1
 
-# --- green 专用:黄括号 + 分支名,红状态符 ---
-parse_git_branch() {
+# --- 配色 green 专用:黄括号 + 分支名,红状态符 ---
+__prompt_git_green() {
     local branch=$(git symbolic-ref --short HEAD 2>/dev/null \
                 || git rev-parse --short HEAD 2>/dev/null)
     [ -z "$branch" ] && return
@@ -70,8 +70,8 @@ parse_git_branch() {
     echo "${YEL}(${branch}${RST}${markers}${YEL})${RST}"
 }
 
-# --- pygmalion 专用:绿分支名,黄 ⚡ 表示有改动 ---
-__prompt_pygmalion_git() {
+# --- 配色 pygmalion 专用:绿分支名,黄 ⚡ 表示有改动 ---
+__prompt_git_pygmalion() {
     local branch
     branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
     [ -z "$branch" ] && return
@@ -88,7 +88,7 @@ __prompt_pygmalion_git() {
 case "$PROMPT_STYLE" in
     pygmalion)
         # 品红 用户名 / 青 @ / 黄 主机名 / 红 : 和 | / 青 路径 / 绿 分支名 / 黄 ⚡ / 青 ⇒
-        PS1='\[\e[0;35m\]\u\[\e[00m\]\[\e[0;36m\]@\[\e[00m\]\[\e[0;33m\]\h\[\e[00m\]\[\e[0;31m\]:\[\e[00m\]\[\e[0;36m\]\w\[\e[00m\]\[\e[0;31m\]|\[\e[00m\]$(__prompt_pygmalion_git)\[\e[0;36m\]⇒\[\e[00m\]  '
+        PS1='\[\e[0;35m\]\u\[\e[00m\]\[\e[0;36m\]@\[\e[00m\]\[\e[0;33m\]\h\[\e[00m\]\[\e[0;31m\]:\[\e[00m\]\[\e[0;36m\]\w\[\e[00m\]\[\e[0;31m\]|\[\e[00m\]$(__prompt_git_pygmalion)\[\e[0;36m\]⇒\[\e[00m\]  '
         ;;
     *)
         # 亮绿 user@host / 蓝 路径 / 黄 分支 / 红 状态符
@@ -96,23 +96,19 @@ case "$PROMPT_STYLE" in
             xterm-color|*-256color) color_prompt=yes;;
         esac
         if [ "$color_prompt" = yes ]; then
-            PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] $(parse_git_branch)\$ '
+            PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] $(__prompt_git_green)\$ '
         else
-            PS1='\u@\h:\w$(parse_git_branch)\$ '
+            PS1='\u@\h:\w$(__prompt_git_green)\$ '
         fi
         unset color_prompt
         ;;
 esac
 
-# === dircolors 与颜色别名 ===
-# 这几个别名依赖 GNU dircolors,故留在本文件而不放 .bash_aliases:
-# macOS 无 /usr/bin/dircolors 且 BSD ls 不认 --color=auto,搬过去会直接报错
+# === dircolors ===
+# 只负责初始化 LS_COLORS;BSD/macOS 无此命令故加守卫
+# 颜色别名(ls/grep/fgrep/egrep)已移至 .bash_aliases,那边带同样的守卫
 if [ -x /usr/bin/dircolors ]; then
     test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
 fi
 
 # === bash_aliases ===
