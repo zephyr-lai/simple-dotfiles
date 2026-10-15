@@ -84,9 +84,11 @@ bash 的幽灵字补全依赖 ble.sh（可选增强，装不上不影响使用�
 | 配置项 | 默认 | 配置后 |
 |--------|------|--------|
 | 登录 shell 加载 | 只读 `.profile`，`.bashrc` 不生效 | `.bash_profile` 交互式转交 `.bashrc`（Terminal 直开 / tmux / `bash -l` 全套生效） |
-| 配色方案 | 固定单套 | `.bashrc` 提示符区 `PROMPT_STYLE` 一行切换：`green` / `pygmalion` |
-| 命令提示符 | `user@host:~/dir$` | green：亮绿 `user@host` + 蓝路径 + 黄 `(分支)`；pygmalion：品红用户名 / 青路径 / 绿分支 / 青 ⇒ |
-| git 状态提示 | 无 | green：红 `*` `+` `?` `↑n` `↓n`；pygmalion：黄 `⚡` |
+| 配色方案 | 固定单套 | `.bashrc` 提示符区 `PROMPT_STYLE` 一行切换：`green` / `pygmalion`，只决定各部位用什么颜色 |
+| git 状态样式 | 无 | 同区 `GIT_STYLE` 一行切换：`detail`（分支 + `*` `+` `?` `↑n` `↓n`）/ `dirty`（分支 + `⚡`） |
+| 命令提示符 | `user@host:~/dir$` | `user@host:路径\|分支⇒`；两个开关正交共 4 种组合，骨架完全相同，只有配色和 git 标记不同 |
+| 配色对照 | 终端默认色 | green：亮绿 `user@host` / 蓝路径 / 黄分支 / 亮绿 ⇒；pygmalion：品红用户名 / 青 `@` / 黄主机 / 红 `:` / 青路径 / 绿分支 / 青 ⇒ |
+| 脏标记颜色 | 无 | 两主题统一橙黄。`⚡` 是彩色 emoji（U+26A1）不吃 ANSI 颜色，所以让 `*` `+` `?` `↑n` `↓n` 向它看齐 |
 | 常用 alias | 无 | `..` `...` `ll` `c` `h` `ports` `rp` `reload` 等 20 个（GNU 平台另加 4 个 `ls`/`grep` 颜色别名） |
 | 历史记录 | 默认 | 去重 + 追加模式 |
 | 幽灵字自动补全 | 无 | 输入时灰色历史建议，→ 采纳整句（ble.sh；需 bash ≥ 4，macOS 先 `brew install bash`） |

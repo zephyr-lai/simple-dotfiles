@@ -7,16 +7,14 @@ case $- in
 esac
 
 # === ble.sh 幽灵字自动补全(需安装,未装自动跳过;安装见 install.sh 的 require_blesh) ===
-# 输入时灰色历史建议,→ 采纳整句、Alt+f 逐词;ble.sh 需在 .bashrc 顶部 source、末尾 attach
-# ble.sh 仅支持 bash>=4(macOS 自带 3.2 会静默失败,先 brew install bash)
 if [ "${BASH_VERSION%%.*}" -ge 4 ] 2>/dev/null; then
-for _blesh in "$HOME/.local/share/blesh/ble.sh" /usr/local/share/blesh/ble.sh /usr/share/blesh/ble.sh; do
-  if [ -f "$_blesh" ]; then
-    source "$_blesh" --noattach
-    break
-  fi
-done
-unset _blesh
+    for _blesh in "$HOME/.local/share/blesh/ble.sh" /usr/local/share/blesh/ble.sh /usr/share/blesh/ble.sh; do
+        if [ -f "$_blesh" ]; then
+            source "$_blesh" --noattach
+            break
+        fi
+    done
+    unset _blesh
 fi
 
 # === 历史记录 ===
@@ -25,68 +23,117 @@ HISTFILESIZE=2000
 HISTCONTROL=ignoreboth              # 忽略重复行 + 空格开头的行
 shopt -s histappend
 
-# === 终端 ===
-shopt -s checkwinsize
-
 # === 提示符 ===
-PROMPT_STYLE=green                 # 可选: green | pygmalion
+PROMPT_STYLE=pygmalion                 # 配色方案: green | pygmalion
+GIT_STYLE=detail                   # git 段样式: detail(分支+*+?↑n↓n) | dirty(分支+⚡)
+                                   # 两个开关自由组合,共 4 种;骨架四者共用,只有颜色和标记不同
 
-__prompt_git_green() {
-    local branch=$(git symbolic-ref --short HEAD 2>/dev/null \
-                || git rev-parse --short HEAD 2>/dev/null)
-    [ -z "$branch" ] && return
-
-    # Bash 非打印字符标记（等价于 \[ \]，在 $(...) 子 shell 中也安全）
-    local NP=$'\001' CP=$'\002' ESC=$'\033'
-    local RST="${NP}${ESC}[00m${CP}" YEL="${NP}${ESC}[01;33m${CP}" RED="${NP}${ESC}[01;31m${CP}"
-
-    local markers=""
-
-    git diff --quiet 2>/dev/null || markers+="${RED}*${RST}"
-    git diff --cached --quiet 2>/dev/null || markers+="${RED}+${RST}"
-    [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ] \
-        && markers+="${RED}?${RST}"
-
-    local ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null)
-    [ -n "$ahead" ] && [ "$ahead" -gt 0 ] && markers+="${RED}↑${ahead}${RST}"
-
-    local behind=$(git rev-list --count HEAD..@{u} 2>/dev/null)
-    [ -n "$behind" ] && [ "$behind" -gt 0 ] && markers+="${RED}↓${behind}${RST}"
-
-    [ -n "$markers" ] && markers=" ${markers}"
-    echo "${YEL}(${branch}${RST}${markers}${YEL})${RST}"
-}
-
-__prompt_git_pygmalion() {
-    local branch
-    branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
-    [ -z "$branch" ] && return
-    local NP=$'\001' CP=$'\002' ESC=$'\033'
-    local GRN="${NP}${ESC}[0;32m${CP}" YEL="${NP}${ESC}[0;33m${CP}" RST="${NP}${ESC}[00m${CP}"
-    local out="${GRN}${branch}"
-    # 脏口径与 zsh parse_git_dirty 一致:staged / unstaged / 未跟踪任一即脏
-    git diff --quiet 2>/dev/null && git diff --cached --quiet 2>/dev/null \
-        && [ -z "$(git ls-files --other --exclude-standard 2>/dev/null)" ] || out+="${YEL}⚡"
-    printf '%s' "${out}${RST} "
-}
-
-# --- 按 PROMPT_STYLE 选 PS1(未知值一律回落 green) ---
+# --- 调色板:PROMPT_STYLE 只决定各部位用什么颜色(数值是 ANSI 色号) ---
+# __C_MARK 是唯一的标记色:dirty 的 ⚡ 与 detail 的 * + ? ↑n ↓n 共用它,
+# 所以两种 git 样式下标记永远同色;换配色时改这一个值即可,别拆成两个变量
 case "$PROMPT_STYLE" in
     pygmalion)
-        PS1='\[\e[0;35m\]\u\[\e[00m\]\[\e[0;36m\]@\[\e[00m\]\[\e[0;33m\]\h\[\e[00m\]\[\e[0;31m\]:\[\e[00m\]\[\e[0;36m\]\w\[\e[00m\]\[\e[0;31m\]|\[\e[00m\]$(__prompt_git_pygmalion)\[\e[0;36m\]⇒\[\e[00m\]  '
+        __C_USER='0;35' __C_AT='0;36' __C_HOST='0;33'
+        __C_SEP='0;31'                             # 冒号和竖线共用一个分隔色
+        __C_PATH='0;36' __C_TAIL='0;36'            # 路径、结尾的 ⇒
+        __C_BRANCH='0;32' __C_MARK='0;33'          # 分支、标记(=⚡ 色)
         ;;
     *)
-        case "$TERM" in
-            xterm-color|*-256color) color_prompt=yes;;
-        esac
-        if [ "$color_prompt" = yes ]; then
-            PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] $(__prompt_git_green)\$ '
-        else
-            PS1='\u@\h:\w$(__prompt_git_green)\$ '
-        fi
-        unset color_prompt
+        __C_USER='01;32' __C_AT='01;32' __C_HOST='01;32'
+        __C_SEP='00'
+        __C_PATH='01;34' __C_TAIL='01;32'
+        __C_BRANCH='01;33' __C_MARK='0;33'         # 分支、标记(=⚡ 色;与 pygmalion 同为橙黄)
         ;;
 esac
+
+# $(...) 里输出的非打印字符标记:\001 \002 等价于 \[ \],在子 shell 中同样安全
+__C_NP=$'\001' __C_CP=$'\002' __C_ESC=$'\033'
+__G_SEP="${__C_NP}${__C_ESC}[${__C_SEP}m${__C_CP}"
+__G_BRANCH="${__C_NP}${__C_ESC}[${__C_BRANCH}m${__C_CP}"
+__G_MARK="${__C_NP}${__C_ESC}[${__C_MARK}m${__C_CP}"
+__G_RST="${__C_NP}${__C_ESC}[00m${__C_CP}"
+
+# --- git 状态:一次 git status 拿全,结果写进 __GIT_* ---
+# 调用方是 PS1 里的 $(...),本身即子 shell,所以这些全局变量不会漏进交互 shell
+__prompt_git_info() {
+    local out line b
+    out=$(git status --porcelain=v1 --branch -unormal 2>/dev/null) || return 1
+
+    __GIT_BRANCH= __GIT_STAGED=0 __GIT_UNSTAGED=0 __GIT_UNTRACKED=0 __GIT_AHEAD=0 __GIT_BEHIND=0
+
+    while IFS= read -r line; do
+        case "$line" in
+            '## '*)
+                # ## master...origin/master [ahead 1, behind 2] / ## master / ## HEAD (no branch)
+                b=${line#\#\# }
+                case "$b" in
+                    'HEAD (no branch)'*)   b=$(git rev-parse --short HEAD 2>/dev/null) ;;   # 游离头:用短 SHA
+                    'No commits yet on '*|'Initial commit on '*)
+                                           b=${b#* on } ;;                                 # 空仓库
+                    *)                     b=${b%%...*}; b=${b%% *} ;;                     # 去掉 upstream
+                esac
+                __GIT_BRANCH=$b
+                case "$line" in *'['*']'*)
+                    b=${line##*\[}; b=${b%%]*}              # "ahead 1, behind 2"
+                    case "$b" in *'ahead '*)
+                        __GIT_AHEAD=${b##*ahead }; __GIT_AHEAD=${__GIT_AHEAD%%,*}
+                    esac
+                    case "$b" in *'behind '*)
+                        __GIT_BEHIND=${b##*behind }; __GIT_BEHIND=${__GIT_BEHIND%%,*}
+                    esac
+                esac
+                ;;
+            '??'*) __GIT_UNTRACKED=1 ;;
+            *)
+                [ -z "$line" ] && continue
+                # porcelain v1 前两列是 XY:未暂存修改是 " M"(首字符是空格),
+                # 别用 [MARCDU]* 之类的模式匹配,会整个漏掉
+                [ "${line:0:1}" != ' ' ] && __GIT_STAGED=1
+                [ "${line:1:1}" != ' ' ] && __GIT_UNSTAGED=1
+                ;;
+        esac
+    done <<< "$out"
+
+    [ "$__GIT_AHEAD" ] || __GIT_AHEAD=0
+    [ -n "$__GIT_BRANCH" ]
+}
+
+# --- git 段渲染:只决定画什么、什么格式,颜色一律取自调色板 ---
+
+# detail:分支 + 逐项标记(* 未暂存 / + 已暂存 / ? 未跟踪 / ↑n 领先 / ↓n 落后)
+__prompt_git_detail() {
+    __prompt_git_info || return
+
+    local marks=""
+    [ "$__GIT_UNSTAGED"  = 1 ] && marks+="${__G_MARK}*${__G_RST}"
+    [ "$__GIT_STAGED"    = 1 ] && marks+="${__G_MARK}+${__G_RST}"
+    [ "$__GIT_UNTRACKED" = 1 ] && marks+="${__G_MARK}?${__G_RST}"
+    [ "$__GIT_AHEAD"  -gt 0 ]  && marks+="${__G_MARK}↑${__GIT_AHEAD}${__G_RST}"
+    [ "$__GIT_BEHIND" -gt 0 ]  && marks+="${__G_MARK}↓${__GIT_BEHIND}${__G_RST}"
+    [ -n "$marks" ] && marks=" ${marks}"
+
+    printf '%s' "${__G_SEP}|${__G_RST}${__G_BRANCH}${__GIT_BRANCH}${__G_RST}${marks}"
+}
+
+# dirty:分支 + 一个脏标记(口径与 zsh parse_git_dirty 一致:暂存/未暂存/未跟踪任一即脏)
+__prompt_git_dirty() {
+    __prompt_git_info || return
+
+    local out="${__G_SEP}|${__G_RST}${__G_BRANCH}${__GIT_BRANCH}"
+    if [ "$__GIT_STAGED" = 1 ] || [ "$__GIT_UNSTAGED" = 1 ] || [ "$__GIT_UNTRACKED" = 1 ]; then
+        out+="${__G_MARK}⚡"
+    fi
+    printf '%s' "${out}${__G_RST} "
+}
+
+# --- 按 GIT_STYLE 绑定 __prompt_git(未知值一律回落 detail) ---
+case "$GIT_STYLE" in
+    dirty) __prompt_git() { __prompt_git_dirty;  } ;;
+    *)     __prompt_git() { __prompt_git_detail; } ;;
+esac
+
+# --- PS1:四个组合共用这一份骨架,颜色由上面的调色板填 ---
+PS1='\[\e[${__C_USER}m\]\u\[\e[00m\]\[\e[${__C_AT}m\]@\[\e[00m\]\[\e[${__C_HOST}m\]\h\[\e[00m\]\[\e[${__C_SEP}m\]:\[\e[00m\]\[\e[${__C_PATH}m\]\w\[\e[00m\]$(__prompt_git)\[\e[${__C_TAIL}m\]⇒\[\e[00m\]  '
 
 # === 别名 / 补全 ===
 if [ -f ~/.bash_aliases ]; then
@@ -105,7 +152,7 @@ fi
 BIN_PATH="$HOME/.npm-global/bin:$HOME/.local/bin"   # 排在系统 PATH 前面,优先级更高
 export PATH="$BIN_PATH:$PATH"
 
-# === 附加 ble.sh(与顶部 source 配对,须在 .bashrc 末尾) ===
+# === 附加 ble.sh(放最后:attach 会抄走 PS1,之后设的 PS1 静默失效) ===
 if [ -n "${BLE_VERSION:-}" ]; then
     ble-attach
 fi
