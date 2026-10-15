@@ -7,7 +7,7 @@ case $- in
 esac
 
 # ==================== 用户配置:日常只改这一段 ====================
-PROMPT_STYLE=green
+PROMPT_STYLE=green                 # 可选: green | pygmalion
 HISTSIZE=1000
 HISTFILESIZE=2000
 BIN_PATH="$HOME/.npm-global/bin:$HOME/.local/bin"
