@@ -6,11 +6,14 @@ case $- in
       *) return;;
 esac
 
-# ==================== 配色方案:改这一行即可切换 ====================
-# green     = 亮绿 user@host + 蓝路径 + 黄(分支) + 红 * + ? ↑↓   ← 默认
-# pygmalion = oh-my-zsh 同款(品红用户名 / 青路径 / 绿分支 / 黄 ⚡)
+# ==================== 用户配置:日常只改这一段 ====================
+# PROMPT_STYLE  green     = 亮绿 user@host + 蓝路径 + 黄(分支) + 红 * ? ↑↓  ← 默认
+#               pygmalion = oh-my-zsh 同款(品红用户名 / 青路径 / 绿分支 / 黄 ⚡)
 PROMPT_STYLE=green
-# ==================================================================
+HISTSIZE=1000             # 内存中保存的历史条数
+HISTFILESIZE=2000         # 历史文件保留的条数
+BIN_PATH="$HOME/.npm-global/bin:$HOME/.local/bin"   # 追加到 PATH 前部,靠前优先级高
+# ==============================================================
 
 # === ble.sh 幽灵字自动补全(需安装,未装自动跳过;安装见 install.sh 的 require_blesh) ===
 # 输入时灰色历史建议,→ 采纳整句、Alt+f 逐词;ble.sh 需在 .bashrc 顶部 source、末尾 attach
@@ -28,8 +31,7 @@ fi
 # === 历史记录 ===
 HISTCONTROL=ignoreboth              # 忽略重复行
 shopt -s histappend                 # 追加而非覆盖
-HISTSIZE=1000
-HISTFILESIZE=2000
+# 条数(HISTSIZE / HISTFILESIZE)见顶部用户配置区
 
 # === 终端 ===
 shopt -s checkwinsize               # 窗口缩放时刷新 LINES/COLUMNS
@@ -126,8 +128,8 @@ if ! shopt -oq posix; then
 fi
 
 # === PATH ===
-# npm-global 在前(与合并前顺序一致,保证同名命令优先级不变)
-export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+# 靠前的优先级更高;待追加的目录见顶部用户配置区的 BIN_PATH
+export PATH="$BIN_PATH:$PATH"
 
 # === 附加 ble.sh(与顶部 source 配对,须在 .bashrc 末尾) ===
 if [ -n "${BLE_VERSION:-}" ]; then
