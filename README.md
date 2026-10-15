@@ -84,8 +84,7 @@ bash 的幽灵字补全依赖 ble.sh（可选增强，装不上不影响使用�
 | 配置项 | 默认 | 配置后 |
 |--------|------|--------|
 | 登录 shell 加载 | 只读 `.profile`，`.bashrc` 不生效 | `.bash_profile` 交互式转交 `.bashrc`（Terminal 直开 / tmux / `bash -l` 全套生效） |
-| 可调参数 | 散落各段 | `.bashrc` 顶部「用户配置」区集中四项：`PROMPT_STYLE` / `HISTSIZE` / `HISTFILESIZE` / `BIN_PATH` |
-| 配色方案 | 固定单套 | `.bashrc` 顶部 `PROMPT_STYLE` 一行切换：`green` / `pygmalion` |
+| 配色方案 | 固定单套 | `.bashrc` 提示符区 `PROMPT_STYLE` 一行切换：`green` / `pygmalion` |
 | 命令提示符 | `user@host:~/dir$` | green：亮绿 `user@host` + 蓝路径 + 黄 `(分支)`；pygmalion：品红用户名 / 青路径 / 绿分支 / 青 ⇒ |
 | git 状态提示 | 无 | green：红 `*` `+` `?` `↑n` `↓n`；pygmalion：黄 `⚡` |
 | 常用 alias | 无 | `..` `...` `ll` `c` `h` `ports` `rp` `reload` 等 20 个（GNU 平台另加 4 个 `ls`/`grep` 颜色别名） |

@@ -6,13 +6,6 @@ case $- in
       *) return;;
 esac
 
-# ==================== 用户配置:日常只改这一段 ====================
-PROMPT_STYLE=green                 # 可选: green | pygmalion
-HISTSIZE=1000
-HISTFILESIZE=2000
-BIN_PATH="$HOME/.npm-global/bin:$HOME/.local/bin"
-# ==============================================================
-
 # === ble.sh 幽灵字自动补全(需安装,未装自动跳过;安装见 install.sh 的 require_blesh) ===
 # 输入时灰色历史建议,→ 采纳整句、Alt+f 逐词;ble.sh 需在 .bashrc 顶部 source、末尾 attach
 # ble.sh 仅支持 bash>=4(macOS 自带 3.2 会静默失败,先 brew install bash)
@@ -27,17 +20,17 @@ unset _blesh
 fi
 
 # === 历史记录 ===
+HISTSIZE=1000
+HISTFILESIZE=2000
 HISTCONTROL=ignoreboth              # 忽略重复行 + 空格开头的行
 shopt -s histappend
-# 条数(HISTSIZE / HISTFILESIZE)见顶部用户配置区
 
 # === 终端 ===
 shopt -s checkwinsize
 
 # === 提示符 ===
-# 两套配色的 git 函数分开常驻(各查各的,互不拖累),由顶部 PROMPT_STYLE 选 PS1
+PROMPT_STYLE=green                 # 可选: green | pygmalion
 
-# --- green 配色专用 ---
 __prompt_git_green() {
     local branch=$(git symbolic-ref --short HEAD 2>/dev/null \
                 || git rev-parse --short HEAD 2>/dev/null)
@@ -64,7 +57,6 @@ __prompt_git_green() {
     echo "${YEL}(${branch}${RST}${markers}${YEL})${RST}"
 }
 
-# --- pygmalion 配色专用 ---
 __prompt_git_pygmalion() {
     local branch
     branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
@@ -96,19 +88,15 @@ case "$PROMPT_STYLE" in
         ;;
 esac
 
-# === dircolors ===
-# 只负责初始化 LS_COLORS;BSD/macOS 无此命令故加守卫
-# 颜色别名(ls/grep/fgrep/egrep)已移至 .bash_aliases,那边带同样的守卫
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-fi
+# === PATH ===
+BIN_PATH="$HOME/.npm-global/bin:$HOME/.local/bin"   # 排在系统 PATH 前面,优先级更高
+export PATH="$BIN_PATH:$PATH"
 
-# === bash_aliases ===
+# === 别名 / 补全 ===
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-# === bash 补全 ===
 if ! shopt -oq posix; then
   if [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
@@ -116,10 +104,6 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-
-# === PATH ===
-# 靠前的优先级更高;待追加的目录见顶部用户配置区的 BIN_PATH
-export PATH="$BIN_PATH:$PATH"
 
 # === 附加 ble.sh(与顶部 source 配对,须在 .bashrc 末尾) ===
 if [ -n "${BLE_VERSION:-}" ]; then

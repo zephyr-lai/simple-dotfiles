@@ -24,10 +24,11 @@ alias clauded="claude --dangerously-skip-permissions"
 alias proxy='export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890'
 alias unproxy='unset https_proxy http_proxy all_proxy'
 
-# ls/grep 颜色别名
+# === 颜色(ls/grep) ===
 # 依赖 GNU dircolors:BSD/macOS 无此命令,且 BSD ls 不认 --color=auto 会直接报错
-# (dircolors 本身的初始化在 .bashrc,本文件在其之后被 source)
 if [ -x /usr/bin/dircolors ]; then
+    # LS_COLORS:有 ~/.dircolors 用自定义的,否则用 dircolors 默认
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
     alias ls='ls --color=auto'
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
