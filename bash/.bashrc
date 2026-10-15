@@ -6,6 +6,12 @@ case $- in
       *) return;;
 esac
 
+# ==================== 配色方案:改这一行即可切换 ====================
+# green     = 亮绿 user@host + 蓝路径 + 黄(分支) + 红 * + ? ↑↓   ← 默认
+# pygmalion = oh-my-zsh 同款(品红用户名 / 青路径 / 绿分支 / 黄 ⚡)
+PROMPT_STYLE=green
+# ==================================================================
+
 # === ble.sh 幽灵字自动补全(需安装,未装自动跳过;安装见 install.sh 的 require_blesh) ===
 # 输入时灰色历史建议,→ 采纳整句、Alt+f 逐词;ble.sh 需在 .bashrc 顶部 source、末尾 attach
 # ble.sh 仅支持 bash>=4(macOS 自带 3.2 会静默失败,先 brew install bash)
@@ -29,19 +35,42 @@ HISTFILESIZE=2000
 shopt -s checkwinsize               # 窗口缩放时刷新 LINES/COLUMNS
 
 # === 提示符 ===
-# 原 PS1 块(已替换为下方 pygmalion 风格,勿删):
-# ⚠ 取消注释恢复时需一并恢复:
-#   ① color_prompt 检测(TERM case)
-#   ② parse_git_branch()
-#   否则永远走 else 无色分支;两者见 commit ca3c067
-# if [ "$color_prompt" = yes ]; then
-# # 原 PS1(已替换为 pygmalion 风格,勿删): PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] $(parse_git_branch)\$ '
-# else
-# # 原 PS1(已替换为 pygmalion 风格,勿删): PS1='\u@\h:\w$(parse_git_branch)\$ '
-# fi
+# 两套配色的 git 函数分开常驻(各查各的,互不拖累),由顶部 PROMPT_STYLE 选 PS1
 
-# oh-my-zsh pygmalion 同款(配色抄自 ~/.oh-my-zsh/themes/pygmalion.zsh-theme)
-# 品红 用户名 / 青 @ / 黄 主机名 / 红 : 和 | / 青 路径 / 绿 分支名 / 黄 ⚡(有改动) / 青 ⇒
+# --- green 专用:黄括号 + 分支名,红状态符 ---
+parse_git_branch() {
+    local branch=$(git symbolic-ref --short HEAD 2>/dev/null \
+                || git rev-parse --short HEAD 2>/dev/null)
+    [ -z "$branch" ] && return
+
+    # Bash 非打印字符标记（等价于 \[ \]，在 $(...) 子 shell 中也安全）
+    local NP=$'\001' CP=$'\002' ESC=$'\033'
+    local RST="${NP}${ESC}[00m${CP}"   # reset
+    local YEL="${NP}${ESC}[01;33m${CP}" # 括号 + 分支名
+    local RED="${NP}${ESC}[01;31m${CP}" # 所有状态标记
+
+    local markers=""
+
+    git diff --quiet 2>/dev/null \
+        || markers+="${RED}*${RST}"                                    # 未暂存
+    git diff --cached --quiet 2>/dev/null \
+        || markers+="${RED}+${RST}"                                    # 已暂存
+    [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ] \
+        && markers+="${RED}?${RST}"                                   # 未跟踪
+
+    local ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null)
+    [ -n "$ahead" ] && [ "$ahead" -gt 0 ] \
+        && markers+="${RED}↑${ahead}${RST}"                            # 未推送
+
+    local behind=$(git rev-list --count HEAD..@{u} 2>/dev/null)
+    [ -n "$behind" ] && [ "$behind" -gt 0 ] \
+        && markers+="${RED}↓${behind}${RST}"                           # 落后
+
+    [ -n "$markers" ] && markers=" ${markers}"
+    echo "${YEL}(${branch}${RST}${markers}${YEL})${RST}"
+}
+
+# --- pygmalion 专用:绿分支名,黄 ⚡ 表示有改动 ---
 __prompt_pygmalion_git() {
     local branch
     branch=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)
@@ -54,7 +83,26 @@ __prompt_pygmalion_git() {
         && [ -z "$(git ls-files --other --exclude-standard 2>/dev/null)" ] || out+="${YEL}⚡"
     printf '%s' "${out}${RST} "
 }
-PS1='\[\e[0;35m\]\u\[\e[00m\]\[\e[0;36m\]@\[\e[00m\]\[\e[0;33m\]\h\[\e[00m\]\[\e[0;31m\]:\[\e[00m\]\[\e[0;36m\]\w\[\e[00m\]\[\e[0;31m\]|\[\e[00m\]$(__prompt_pygmalion_git)\[\e[0;36m\]⇒\[\e[00m\]  '
+
+# --- 按 PROMPT_STYLE 选 PS1(未知值一律回落 green) ---
+case "$PROMPT_STYLE" in
+    pygmalion)
+        # 品红 用户名 / 青 @ / 黄 主机名 / 红 : 和 | / 青 路径 / 绿 分支名 / 黄 ⚡ / 青 ⇒
+        PS1='\[\e[0;35m\]\u\[\e[00m\]\[\e[0;36m\]@\[\e[00m\]\[\e[0;33m\]\h\[\e[00m\]\[\e[0;31m\]:\[\e[00m\]\[\e[0;36m\]\w\[\e[00m\]\[\e[0;31m\]|\[\e[00m\]$(__prompt_pygmalion_git)\[\e[0;36m\]⇒\[\e[00m\]  '
+        ;;
+    *)
+        # 亮绿 user@host / 蓝 路径 / 黄 分支 / 红 状态符
+        case "$TERM" in
+            xterm-color|*-256color) color_prompt=yes;;
+        esac
+        if [ "$color_prompt" = yes ]; then
+            PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] $(parse_git_branch)\$ '
+        else
+            PS1='\u@\h:\w$(parse_git_branch)\$ '
+        fi
+        unset color_prompt
+        ;;
+esac
 
 # === dircolors 与颜色别名 ===
 # 这几个别名依赖 GNU dircolors,故留在本文件而不放 .bash_aliases:

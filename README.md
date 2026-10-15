@@ -84,9 +84,9 @@ bash 的幽灵字补全依赖 ble.sh（可选增强，装不上不影响使用�
 | 配置项 | 默认 | 配置后 |
 |--------|------|--------|
 | 登录 shell 加载 | 只读 `.profile`，`.bashrc` 不生效 | `.bash_profile` 交互式转交 `.bashrc`（Terminal 直开 / tmux / `bash -l` 全套生效） |
-| 命令提示符 | `user@host:~/dir$` | pygmalion 同款彩色：品红用户名 / 青 @、路径、⇒ / 黄主机名 / 红 `:` 与 `\|` |
-| git 分支显示 | 无 | 路径后红 `\|` + 绿分支名（仿 oh-my-zsh pygmalion） |
-| git 状态提示 | 无 | 有改动时分支后黄色 `⚡` |
+| 配色方案 | 固定单套 | `.bashrc` 顶部 `PROMPT_STYLE` 一行切换：`green` / `pygmalion` |
+| 命令提示符 | `user@host:~/dir$` | green：亮绿 `user@host` + 蓝路径 + 黄 `(分支)`；pygmalion：品红用户名 / 青路径 / 绿分支 / 青 ⇒ |
+| git 状态提示 | 无 | green：红 `*` `+` `?` `↑n` `↓n`；pygmalion：黄 `⚡` |
 | 常用 alias | 无 | `..` `...` `ll` `c` `h` `ports` `rp` `reload` 等 20 个 |
 | 历史记录 | 默认 | 去重 + 追加模式 |
 | 幽灵字自动补全 | 无 | 输入时灰色历史建议，→ 采纳整句（ble.sh；需 bash ≥ 4，macOS 先 `brew install bash`） |
