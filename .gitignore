@@ -8,3 +8,7 @@ claude/settings.local.json
 vim/.vim/undo/
 vim/.vim/.netrwhist
 .vim/
+
+# ble.sh runtime cache (created when ble.sh is sourced from the vendored copy)
+tools/blesh/cache.d/
+tools/blesh/run/
