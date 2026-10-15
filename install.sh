@@ -21,6 +21,7 @@ backup_bash() {
     echo "==> backup bash"
     backup_file .bashrc
     backup_file .bash_aliases
+    backup_file .bash_profile
 }
 
 backup_vim() {
@@ -55,9 +56,10 @@ backup_all() {
 
 install_bash() {
     echo "==> install bash"
-require_blesh
+    require_blesh
     cp "$DOTFILES/bash/.bashrc" "$HOME/.bashrc"
     cp "$DOTFILES/bash/.bash_aliases" "$HOME/.bash_aliases"
+    cp "$DOTFILES/bash/.bash_profile" "$HOME/.bash_profile"
     echo "  [copy] bash installed"
 }
 
@@ -252,6 +254,7 @@ uninstall_bash() {
     echo "==> uninstall bash"
     remove_file .bashrc
     remove_file .bash_aliases
+    remove_file .bash_profile
 }
 
 uninstall_vim() {
@@ -289,7 +292,7 @@ deploy_bash() {
     backup_file .bashrc
     backup_file .bash_aliases
     backup_file .bash_profile
-require_blesh
+    require_blesh
     [ "$METHOD" = "stow" ] && stow_link bash || install_bash
 }
 
