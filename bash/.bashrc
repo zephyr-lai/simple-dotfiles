@@ -30,6 +30,10 @@ shopt -s checkwinsize               # 窗口缩放时刷新 LINES/COLUMNS
 
 # === 提示符 ===
 # 原 PS1 块(已替换为下方 pygmalion 风格,勿删):
+# ⚠ 取消注释恢复时需一并恢复:
+#   ① color_prompt 检测(TERM case)
+#   ② parse_git_branch()
+#   否则永远走 else 无色分支;两者见 commit ca3c067
 # if [ "$color_prompt" = yes ]; then
 # # 原 PS1(已替换为 pygmalion 风格,勿删): PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] $(parse_git_branch)\$ '
 # else
