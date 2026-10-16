@@ -13,6 +13,8 @@ simple-dotfiles/
 ├── tools/stow/         ← vendored GNU stow（断网兜底，见「stow 自动安装」）
 ├── tools/blesh/        ← vendored ble.sh 构建产物（断网兜底，见「ble.sh 自动安装」）
 ├── tools/restore-plugins.sh ← Claude Code 插件清单兼一键恢复脚本（全新机器直接运行）
+├── tools/gen-screenshots.py ← 从当前配置实拍 README 里的截图（纯 PIL，改了配置重跑）
+├── docs/images/        ← 上面那个脚本的产物，README 引用
 ├── install.sh          ← 唯一入口
 ├── CLAUDE.md           ← 项目规则（AI 辅助开发时自动加载）
 └── README.md
@@ -93,6 +95,12 @@ bash 的幽灵字补全依赖 ble.sh（可选增强，装不上不影响使用�
 | 历史记录 | 默认 | 去重 + 追加模式 |
 | 幽灵字自动补全 | 无 | 输入时灰色历史建议，→ 采纳整句（ble.sh；需 bash ≥ 4，macOS 先 `brew install bash`） |
 
+两个开关正交，四种组合共用一个骨架，差别只在配色和 git 标记：
+
+![bash 提示符四种组合：green / pygmalion × detail / dirty](docs/images/bash-prompt.png)
+
+（本文截图都由 `python3 tools/gen-screenshots.py` 拿当前配置实跑生成，改了配置重跑一次就同步。）
+
 ## vim
 
 | 配置项 | 默认 | 配置后 |
@@ -112,6 +120,10 @@ bash 的幽灵字补全依赖 ble.sh（可选增强，装不上不影响使用�
 | git 改动标记 | 无 | 行号左侧 `+` `~` `-` 标记（gitgutter） |
 | 注释代码 | 手打注释符 | `gcc` 一键注释/取消（vim-commentary） |
 | 文件浏览器 | 无 | 内置 netrw，`<C-n>` 开关目录树 |
+
+行号左侧的 `+` `~` `-` 是 gitgutter 的改动标记，底部是 lightline 状态栏：
+
+![vim：行号、retrobox 语法高亮、lightline 状态栏、gitgutter 改动标记](docs/images/vim.png)
 
 ### vim 常用快捷键
 
@@ -142,6 +154,10 @@ bash 的幽灵字补全依赖 ble.sh（可选增强，装不上不影响使用�
 | 状态栏 | 默认 | Catppuccin Mocha 暗色主题，左侧 session\|window\|pane，右侧时间日期 |
 | 会话恢复 | 无 | tmux-resurrect（手动）+ tmux-continuum（自动） |
 | 复制模式 | 默认 | vi 键位（`v` 选择 `y` 复制），OSC 52 同步系统剪贴板 |
+
+左右分屏 + Catppuccin Mocha 状态栏（左侧 session/window/pane，右侧时间日期）：
+
+![tmux：Catppuccin Mocha 状态栏 + 左右分屏](docs/images/tmux.png)
 
 ## git
 

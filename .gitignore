@@ -12,3 +12,6 @@ vim/.vim/.netrwhist
 # ble.sh runtime cache (created when ble.sh is sourced from the vendored copy)
 tools/blesh/cache.d/
 tools/blesh/run/
+
+# Python bytecode cache (gen-screenshots.py gets imported by ad-hoc probes)
+__pycache__/
