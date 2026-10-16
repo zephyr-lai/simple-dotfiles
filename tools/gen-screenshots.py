@@ -12,10 +12,8 @@
 
 依赖:Pillow、DejaVu Sans Mono(正文)、NotoColorEmoji(⚡)、tmux(取 vim/tmux 画面)。
 
-插件都随仓库分发,但取用方式不同:tmux 那张把仓库里的 plugins 目录指给假 HOME,
-跟本机部署状态无关;vim 那张不换 HOME,读真 HOME 的 ~/.vimrc 和 ~/.vim ——
-这两条是 stow 软链回本仓库的,配置一致,插件(vim-plug 装在 .vim/plugged)也在。
-没部署过的机器上 vim 会退化成裸 vim、tmux 状态栏会退化成默认色,但都不报错。
+配置和插件都随仓库分发,要用到时一律软链仓库自带的那份进假 HOME,所以不依赖
+本机的部署状态 —— 刚 clone 下来、还没跑 install.sh 也能拍出一模一样的图。
 """
 
 import os
@@ -365,12 +363,15 @@ def tmux_capture(cmd, cols, rows, settle=2.5, sock="shotgen"):
     return p.stdout.decode("utf-8", "replace").rstrip("\n").split("\n")
 
 
-def vim_shot(repo):
+def vim_shot(home, repo):
     """vim:行号 + 语法高亮 + lightline 状态栏 + gitgutter 改动标记。"""
-    # 这张故意不换 HOME:真 HOME 里的 ~/.vimrc 是 stow 软链回本仓库的那份,配置
-    # 一致,而插件(vim-plug 装在 ~/.vim/plugged)只在真 HOME 下找得到 ——
-    # 换成演示用的假 HOME 就只剩一个裸 vim,状态栏和改动标记全没了。
-    lines = tmux_capture(f"cd {repo} && vim src/main.c", 84, 18, settle=3.0)
+    # 配置和插件都取仓库里的那份(插件是随仓库分发的,见 README 目录结构),
+    # 而不是真 HOME 里 stow 出来的软链 —— 那样没部署过的机器上会拍成裸 vim。
+    # .vimrc 里写的是 plug#begin('~/.vim/plugged'),~ 按 $HOME 展开,顺着软链
+    # 正好落到仓库的 vim/.vim/plugged。
+    (home / ".vimrc").symlink_to(REPO / "vim" / ".vimrc")
+    (home / ".vim").symlink_to(REPO / "vim" / ".vim")
+    lines = tmux_capture(f"cd {repo} && HOME={home} vim src/main.c", 84, 18, settle=3.0)
     render(lines, OUT_DIR / "vim.png", "vim - lightline + gitgutter")
 
 
@@ -414,6 +415,6 @@ if __name__ == "__main__":
         repo = make_fixture(home)
         print("生成截图:")
         bash_shot(tmp, home, repo)
-        vim_shot(repo)
+        vim_shot(home, repo)
         tmux_shot(home, repo)
     print("完成。")

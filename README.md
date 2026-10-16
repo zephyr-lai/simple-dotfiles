@@ -99,7 +99,7 @@ bash 的幽灵字补全依赖 ble.sh（可选增强，装不上不影响使用�
 
 ![bash 提示符四种组合：green / pygmalion × detail / dirty](docs/images/bash-prompt.png)
 
-（本文截图都由 `python3 tools/gen-screenshots.py` 拿当前配置实跑生成，改了配置重跑一次就同步。）
+（本文截图都由 `python3 tools/gen-screenshots.py` 拿本仓库的配置实跑生成，改了配置重跑一次就同步；不需要先部署过。）
 
 ## vim
 
