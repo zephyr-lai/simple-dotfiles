@@ -10,7 +10,7 @@
     df  = difftool
     dfs = difftool --staged
 [user]
-	name = zephyrus
-	email = zhipinglai@qq.com
+	name = zplai
+	email = laizhiping@ledatech.cn
 [credential]
 	helper = store
