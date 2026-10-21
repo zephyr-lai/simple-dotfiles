@@ -3,6 +3,7 @@
 
 # secrets — the real local settings must never be committed
 claude/settings.local.json
+bash/.bashrc.local
 
 # vim runtime
 vim/.vim/undo/

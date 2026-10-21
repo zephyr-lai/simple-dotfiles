@@ -1,0 +1,2 @@
+# stow 包内的本机私有文件,永不链接(真正的本地配置在 ~/.bashrc.local)
+\.bashrc\.local

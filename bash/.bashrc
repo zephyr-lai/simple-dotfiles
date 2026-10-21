@@ -37,12 +37,14 @@ case "$PROMPT_STYLE" in
         __C_SEP='0;31'                             # 冒号和竖线共用一个分隔色
         __C_PATH='0;36' __C_TAIL='0;36'            # 路径、结尾的 ⇒
         __C_BRANCH='0;32' __C_MARK='0;33'          # 分支、标记(=⚡ 色)
+        __C_VENV='01;32'                           # 虚拟环境名
         ;;
     *)
         __C_USER='01;32' __C_AT='01;32' __C_HOST='01;32'
         __C_SEP='00'
         __C_PATH='01;34' __C_TAIL='01;32'
         __C_BRANCH='01;33' __C_MARK='0;33'         # 分支、标记(=⚡ 色;与 pygmalion 同为橙黄)
+        __C_VENV='01;35'                           # 虚拟环境名
         ;;
 esac
 
@@ -51,7 +53,12 @@ __C_NP=$'\001' __C_CP=$'\002' __C_ESC=$'\033'
 __G_SEP="${__C_NP}${__C_ESC}[${__C_SEP}m${__C_CP}"
 __G_BRANCH="${__C_NP}${__C_ESC}[${__C_BRANCH}m${__C_CP}"
 __G_MARK="${__C_NP}${__C_ESC}[${__C_MARK}m${__C_CP}"
+__G_VENV="${__C_NP}${__C_ESC}[${__C_VENV}m${__C_CP}"
 __G_RST="${__C_NP}${__C_ESC}[00m${__C_CP}"
+
+# 关掉 venv 自带的 PS1 前缀:新版 Python 的 VIRTUAL_ENV_PROMPT 已含括号,
+# activate 又套一层,会渲染成 ((.venv) ) 且没有颜色。改由 __prompt_venv 自己画。
+export VIRTUAL_ENV_DISABLE_PROMPT=1
 
 # --- git 状态:一次 git status 拿全,结果写进 __GIT_* ---
 # 调用方是 PS1 里的 $(...),本身即子 shell,所以这些全局变量不会漏进交互 shell
@@ -132,8 +139,15 @@ case "$GIT_STYLE" in
     *)     __prompt_git() { __prompt_git_detail; } ;;
 esac
 
+# --- venv 段:激活虚拟环境时在提示符最前面显示带颜色的 [环境名] ---
+__prompt_venv() {
+    [ -n "$VIRTUAL_ENV" ] || return
+    local name=${VIRTUAL_ENV%/}
+    printf '%s' "${__G_VENV}[${name##*/}]${__G_RST} "
+}
+
 # --- PS1:四个组合共用这一份骨架,颜色由上面的调色板填 ---
-PS1='\[\e[${__C_USER}m\]\u\[\e[00m\]\[\e[${__C_AT}m\]@\[\e[00m\]\[\e[${__C_HOST}m\]\h\[\e[00m\]\[\e[${__C_SEP}m\]:\[\e[00m\]\[\e[${__C_PATH}m\]\w\[\e[00m\]$(__prompt_git)\[\e[${__C_TAIL}m\]⇒\[\e[00m\]  '
+PS1='$(__prompt_venv)\[\e[${__C_USER}m\]\u\[\e[00m\]\[\e[${__C_AT}m\]@\[\e[00m\]\[\e[${__C_HOST}m\]\h\[\e[00m\]\[\e[${__C_SEP}m\]:\[\e[00m\]\[\e[${__C_PATH}m\]\w\[\e[00m\]$(__prompt_git)\[\e[${__C_TAIL}m\]⇒\[\e[00m\]  '
 
 # === 别名 / 补全 ===
 if [ -f ~/.bash_aliases ]; then
@@ -152,7 +166,17 @@ fi
 BIN_PATH="$HOME/.npm-global/bin:$HOME/.local/bin"   # 排在系统 PATH 前面,优先级更高
 export PATH="$BIN_PATH:$PATH"
 
+# === 本机私有配置(不入仓库) ===
+# 内部地址、机器专属变量放 ~/.bashrc.local;该文件在 home 下,不在 stow 包内
+if [ -f ~/.bashrc.local ]; then
+    . ~/.bashrc.local
+fi
+
 # === 附加 ble.sh(放最后:attach 会抄走 PS1,之后设的 PS1 静默失效) ===
 if [ -n "${BLE_VERSION:-}" ]; then
     ble-attach
 fi
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

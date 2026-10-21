@@ -6,7 +6,7 @@
 
 ```
 simple-dotfiles/
-├── bash/               ← stow 包：.bashrc + .bash_profile + .bash_aliases
+├── bash/               ← stow 包：.bashrc + .bash_profile + .bash_aliases + .stow-local-ignore
 ├── vim/                ← stow 包：.vimrc + .vim/
 ├── tmux/               ← stow 包：.tmux.conf + .tmux/
 ├── git/                ← stow 包：.gitconfig
@@ -94,12 +94,24 @@ bash 的幽灵字补全依赖 ble.sh（可选增强，装不上不影响使用�
 | 常用 alias | 无 | `..` `...` `ll` `c` `h` `ports` `rp` `reload` 等 20 个（GNU 平台另加 4 个 `ls`/`grep` 颜色别名） |
 | 历史记录 | 默认 | 去重 + 追加模式 |
 | 幽灵字自动补全 | 无 | 输入时灰色历史建议，→ 采纳整句（ble.sh；需 bash ≥ 4，macOS 先 `brew install bash`） |
+| 本机私有配置 | 无 | `~/.bashrc.local` 存在时自动 source；放内部地址、机器专属变量，该文件不入仓库 |
 
 两个开关正交，四种组合共用一个骨架，差别只在配色和 git 标记：
 
 ![bash 提示符四种组合：green / pygmalion × detail / dirty](docs/images/bash-prompt.png)
 
 （本文截图都由 `python3 tools/gen-screenshots.py` 拿本仓库的配置实跑生成，改了配置重跑一次就同步；不需要先部署过。）
+
+### 本机私有配置
+
+`~/.bashrc.local` 存在时会被自动 source，用于内部地址、许可证服务器、机器专属变量等不应提交的内容：
+
+```bash
+# ~/.bashrc.local（自行创建，不入 git）
+export SOME_INTERNAL_LICENSE=27000@license.example.com
+```
+
+该文件位于 home 下、不在 stow 包内；若误在 `bash/` 包内创建同名文件，`.gitignore` 和 `.stow-local-ignore` 也会阻止它被提交或链接。
 
 ## vim
 
